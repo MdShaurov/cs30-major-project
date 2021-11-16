@@ -1,2 +1,6 @@
-# cs30-major-project
-Computer science 30 major project.
+# CS30 Major Project Proposal - Md Shaurov
+
+
+Need to Have List:
+
+Nice to Have List:
