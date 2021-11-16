@@ -15,3 +15,15 @@ function draw() {
   
   rect(mouseX, mouseY, 100, 50);
 }
+
+class Character {
+  constructor(x, y, choice) {
+    this.x = x;
+    this.y = y;
+
+  }
+
+  display() {
+    image(characterImg, this.x, this.y);
+  }
+}
