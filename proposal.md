@@ -8,6 +8,7 @@ Need to Have List:
 - random terrain generation
 - ability to move, aim, and shoot
 - draw 2 tanks on either sides
+- bullet physics
 
 Nice to Have List:
 - ability to shoot different types of shells
