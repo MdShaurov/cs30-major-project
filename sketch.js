@@ -27,12 +27,21 @@ function displayTerrain() {
     rect(theWidth*i, height, 10, -theHeight);
   }
 }
+
 function generateTerrain() {
   let time = 0;
   for (let i=0; i<numberOfRects; i++) {
     let theHeight = noise(time) * height;
     rectHeights.push(theHeight);
-    time += 0.002;
+    time += 0.001;
   }
 }
 
+class LeftTank {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  
+}
