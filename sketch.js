@@ -5,7 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-let leftTank, rightTank;
+let leftTank, rightTank, bullet;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -42,5 +42,27 @@ class Tank {
         this.x--;
       }
     }
+  }
+
+  shootBullet() {
+    if (mouseIsPressed) {
+      bullet = new Bullet(mouseX, mouseY);
+    }
+  }
+}
+
+class Bullet {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.dx = 3;
+  }
+
+  display() {
+    circle(this.x, this.y, 5);
+  }
+
+  update() {
+    this.x += this.dx;
   }
 }
