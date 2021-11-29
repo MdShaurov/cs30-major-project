@@ -27,11 +27,16 @@ function setup() {
 function draw() {
   background(220);
 
-  leftTank.shootBullet();
   leftTank.update();
   leftTank.display();
 }
 
+function mousePressed() {
+  if (mouseIsPressed) {
+    
+    if ()
+  }
+}
 
 class Tank {
   constructor(x, y) {
@@ -66,10 +71,8 @@ class Tank {
   }
 
   shootBullet() {
-    if (keyIsDown(65)) {
-      let bullet = new Bullet(this.x, this.y);
-      this.bulletArray.push(bullet);
-    }
+    let bullet = new Bullet(this.x, this.y);
+    this.bulletArray.push(bullet);
   }
 }
 
@@ -77,12 +80,11 @@ class Bullet {
   constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.dx = 3;
-    this.dy = 3;
+    this.speed = 3;
   }
 
   update() {
-    this.x += this.dx;
+    this.x += this.speed;
   }
 
   display() {
