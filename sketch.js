@@ -1,17 +1,21 @@
 // CS30 Major Project
 // Md Shaurov
-// february 14, 2021
+// January 7, 2022
 //
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
 let leftTank, rightTank, bullet;
 let leftTurn, rightTurn;
+let rectHeights = [];
+let numberOfRects;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  numberOfRects = width;
+  generateTerrain();
 
-  leftTank = new Tank(100, 700);
+  leftTank = new Tank(100, 100);
   
   let turn = random(0, 1);
   if (turn > 0) {
@@ -25,16 +29,34 @@ function setup() {
 }
 
 function draw() {
-  background(220);
+  background(0);
 
   leftTank.update();
   leftTank.display();
+  displayTerrain();
 }
 
 function mousePressed() {
   if (mouseIsPressed) {
-    
-    if ()
+    leftTank.shootBullet(leftTank.x, leftTank.y);
+  }
+}
+
+function displayTerrain() {
+  let theWidth = width/rectHeights.length;
+  for (let i=0; i<rectHeights.length; i++) {
+    let theHeight = rectHeights[i];
+    fill(255);
+    rect(theWidth*i, height, 10, -theHeight);
+  }
+}
+
+function generateTerrain() {
+  let time = 0;
+  for (let i=0; i<numberOfRects; i++) {
+    let theHeight = noise(time) * height/2;
+    rectHeights.push(theHeight);
+    time += 0.002;
   }
 }
 
@@ -42,11 +64,13 @@ class Tank {
   constructor(x, y) {
     this.x = x;
     this.y = y;
+    this.width = 20;
+    this.height = 20;
     this.bulletArray = [];
   }
 
   display() {
-    rect(this.x, this.y, 20, 20);
+    rect(this.x, this.y, this.width, this.height);
   }
 
   update() {
@@ -70,21 +94,25 @@ class Tank {
     }
   }
 
-  shootBullet() {
-    let bullet = new Bullet(this.x, this.y);
+  shootBullet(x, y) {
+    let theta = 1/tan((mouseY - this.y)/(mouseX - this.x));
+    
+    let bullet = new Bullet(x, y, theta);
     this.bulletArray.push(bullet);
   }
 }
 
 class Bullet {
-  constructor(x, y) {
+  constructor(x, y, angle) {
     this.x = x;
     this.y = y;
     this.speed = 3;
+    this.angle = angle;
   }
 
   update() {
-    this.x += this.speed;
+    this.x += tan(this.angle) * this.speed;
+    this.y += sin(this.angle) * this.speed;
   }
 
   display() {
