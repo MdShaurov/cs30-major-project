@@ -95,7 +95,8 @@ class Tank {
   }
 
   shootBullet(x, y) {
-    let theta = 1/tan((mouseY - this.y)/(mouseX - this.x));
+    angleMode(DEGREES);
+    let theta = atan2(mouseY - this.y, mouseX - this.x);
     
     let bullet = new Bullet(x, y, theta);
     this.bulletArray.push(bullet);
@@ -111,11 +112,11 @@ class Bullet {
   }
 
   update() {
-    this.x += tan(this.angle) * this.speed;
+    this.x += cos(this.angle) * this.speed;
     this.y += sin(this.angle) * this.speed;
   }
 
   display() {
-    circle(this.x, this.y, 5, 5);
+    circle(this.x, this.y, 5);
   }
 }
