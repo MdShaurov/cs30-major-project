@@ -30,15 +30,46 @@ function setup() {
 
 function draw() {
   background(0);
+  keyPressed();
+
 
   leftTank.update();
   leftTank.display();
   displayTerrain();
 }
 
+function keyPressed() {
+
+  // Keyboard interaction
+  if (keyIsDown(68)) {
+    if (leftTank.x >= 0) {
+      leftTank.x++;
+    }
+  }
+  if (keyIsDown(65)) {
+    if (leftTank.x > 0) {
+      leftTank.x--;
+    }
+  }
+}
+
 function mousePressed() {
+
+  // Mouse interaction
   if (mouseIsPressed) {
     leftTank.shootBullet(leftTank.x, leftTank.y);
+  }
+}
+
+function mouseWheel(event) {
+  if (leftTank.bulletSpeed >= 3 && leftTank.bulletSpeed <= 13) {
+    leftTank.bulletSpeed -= event.delta/100;
+    if (leftTank.bulletSpeed <= 2) {
+      leftTank.bulletSpeed = 3;
+    }
+    else if (leftTank.bulletSpeed >= 14) {
+      leftTank.bulletSpeed = 13;
+    }
   }
 }
 
@@ -67,6 +98,7 @@ class Tank {
     this.width = 20;
     this.height = 20;
     this.bulletArray = [];
+    this.bulletSpeed = 3;
   }
 
   display() {
@@ -74,17 +106,6 @@ class Tank {
   }
 
   update() {
-    if (keyIsDown(68)) {
-      if (this.x >= 0) {
-        this.x++;
-      }
-    }
-    if (keyIsDown(65)) {
-      if (this.x > 0) {
-        this.x--;
-      }
-    }
-
     for (let bullet of this.bulletArray) {
       bullet.update();
       bullet.display();
@@ -96,18 +117,18 @@ class Tank {
 
   shootBullet(x, y) {
     angleMode(DEGREES);
-    let theta = atan2(mouseY - this.y, mouseX - this.x);
+    let angleToMouse = atan2(mouseY - this.y, mouseX - this.x);
     
-    let bullet = new Bullet(x, y, theta);
+    let bullet = new Bullet(x, y, angleToMouse, this.bulletSpeed);
     this.bulletArray.push(bullet);
   }
 }
 
 class Bullet {
-  constructor(x, y, angle) {
+  constructor(x, y, angle, speed) {
     this.x = x;
     this.y = y;
-    this.speed = 3;
+    this.speed = speed;
     this.angle = angle;
   }
 
