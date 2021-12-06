@@ -107,11 +107,12 @@ class Tank {
 
   update() {
     for (let i=0; i<rectHeights.length; i++) {
-      if (this.y < height - rectHeights[i] - 100) {
+      if (this.y < height - rectHeights[i]) {
+        console.log(height - rectHeights[i]);
         this.y += 3;
+        console.log(this.y);
       }
     }
-
 
     for (let bullet of this.bulletArray) {
       bullet.update();
