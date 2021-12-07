@@ -51,6 +51,10 @@ function keyPressed() {
       leftTank.x--;
     }
   }
+  if (keyIsDown(32)) {
+    leftTank.x = mouseX;
+    leftTank.y = mouseY;
+  }
 }
 
 function mousePressed() {
@@ -78,7 +82,8 @@ function displayTerrain() {
   for (let i=0; i<rectHeights.length; i++) {
     let theHeight = rectHeights[i];
     fill(255);
-    rect(theWidth*i, height, 10, -theHeight);
+    noStroke;
+    rect(theWidth*i, height - rectHeights[i], 10, theHeight);
   }
 }
 
@@ -107,10 +112,11 @@ class Tank {
 
   update() {
     for (let i=0; i<rectHeights.length; i++) {
-      if (this.y < height - rectHeights[i]) {
-        console.log(height - rectHeights[i]);
+      if (this.y < height - rectHeights[i] - 30) {
         this.y += 3;
-        console.log(this.y);
+        if (this.y >= height - rectHeights[i] - 30) {
+          this.y = height - rectHeights[i] - 30;
+        }
       }
     }
 
