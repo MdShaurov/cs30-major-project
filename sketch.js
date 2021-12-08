@@ -80,10 +80,9 @@ function mouseWheel(event) {
 function displayTerrain() {
   let theWidth = width/rectHeights.length;
   for (let i=0; i<rectHeights.length; i++) {
-    let theHeight = rectHeights[i];
     fill(255);
-    noStroke;
-    rect(theWidth*i, height - rectHeights[i], 10, theHeight);
+    noStroke();
+    rect(theWidth*i, height - rectHeights[i], 10, rectHeights[i]);
   }
 }
 
@@ -111,14 +110,17 @@ class Tank {
   }
 
   update() {
-    for (let i=0; i<rectHeights.length; i++) {
-      if (this.y < height - rectHeights[i] - 30) {
-        this.y += 3;
-        if (this.y >= height - rectHeights[i] - 30) {
-          this.y = height - rectHeights[i] - 30;
-        }
-      }
-    }
+    // for (let i=0; i<rectHeights.length; i++) {
+    //   while (this.y < height - rectHeights[i] - 20) {
+    //     this.y += 1;
+    //     console.log(this.y);
+    //     console.log(height - rectHeights[i] - 20);
+    //     circle(100, 20, 50);
+    //   if (this.y >= height - rectHeights[i] - 30) {
+    //      this.y = height - rectHeights[i] - 30;
+    //    }
+    //   }
+    // }
 
     for (let bullet of this.bulletArray) {
       bullet.update();
