@@ -32,10 +32,10 @@ function draw() {
   background(0);
   keyPressed();
 
-
   leftTank.update();
   leftTank.display();
   displayTerrain();
+  showPower(leftTank.bulletSpeed);
 }
 
 function keyPressed() {
@@ -58,7 +58,6 @@ function keyPressed() {
 }
 
 function mousePressed() {
-
   // Mouse interaction
   if (mouseIsPressed) {
     leftTank.shootBullet(leftTank.x, leftTank.y);
@@ -75,6 +74,13 @@ function mouseWheel(event) {
       leftTank.bulletSpeed = 13;
     }
   }
+}
+
+function showPower(diameter) {
+  fill(255, 255, 0, 30);
+  circle(leftTank.x + leftTank.width/2, leftTank.y + leftTank.height/2, 100);
+  fill(255, 255, 0, 50);
+  circle(leftTank.x + leftTank.width/2, leftTank.y + leftTank.height/2, (diameter - 3) * 10);
 }
 
 function displayTerrain() {
@@ -95,6 +101,20 @@ function generateTerrain() {
   }
 }
 
+function physics() {
+  // for (let i=0; i<rectHeights.length; i++) {
+  //   if (this.y < height - rectHeights[i] - 20) {
+  //     this.y += 1;
+  //     console.log(this.y);
+  //     console.log(height - rectHeights[i] - 20);
+  //     circle(100, 20, 50);
+  //     if (this.y >= height - rectHeights[i] - 20) {
+  //       this.y = height - rectHeights[i] - 20;
+  //     }
+  //   }
+  // }
+}
+
 class Tank {
   constructor(x, y) {
     this.x = x;
@@ -106,22 +126,11 @@ class Tank {
   }
 
   display() {
+    fill("red");
     rect(this.x, this.y, this.width, this.height);
   }
 
   update() {
-    // for (let i=0; i<rectHeights.length; i++) {
-    //   while (this.y < height - rectHeights[i] - 20) {
-    //     this.y += 1;
-    //     console.log(this.y);
-    //     console.log(height - rectHeights[i] - 20);
-    //     circle(100, 20, 50);
-    //   if (this.y >= height - rectHeights[i] - 30) {
-    //      this.y = height - rectHeights[i] - 30;
-    //    }
-    //   }
-    // }
-
     for (let bullet of this.bulletArray) {
       bullet.update();
       bullet.display();
@@ -135,7 +144,7 @@ class Tank {
     angleMode(DEGREES);
     let angleToMouse = atan2(mouseY - this.y, mouseX - this.x);
     
-    let bullet = new Bullet(x, y, angleToMouse, this.bulletSpeed);
+    let bullet = new Bullet(x + this.width/2, y + this.height/2, angleToMouse, this.bulletSpeed);
     this.bulletArray.push(bullet);
   }
 }
@@ -154,6 +163,7 @@ class Bullet {
   }
 
   display() {
+    fill(255);
     circle(this.x, this.y, 5);
   }
 }
