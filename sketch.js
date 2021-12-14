@@ -1,6 +1,6 @@
-// CS30 Major Project
+// CS30 Major Project - ShellShock
 // Md Shaurov
-// January 7, 2022
+// January 27, 2022
 //
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
@@ -9,14 +9,80 @@ let leftTank, rightTank, bullet;
 let leftTurn, rightTurn;
 let rectHeights = [];
 let numberOfRects;
+let gameOn;
+let userInfo, theWidth;
+let startScreen = true;
+let tankTouchGround;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  numberOfRects = width;
+
+  numberOfRects = width/15;
   generateTerrain();
 
   leftTank = new Tank(100, 100);
-  
+}
+
+function draw() {
+  background(0);
+  displayTerrain();
+  keyPressed();
+  console.log(tankTouchGround);
+
+  leftTank.physics();
+  leftTank.update();
+  leftTank.display();
+
+}
+
+function keyPressed() {
+
+  if (startScreen) {
+    if (keyIsDown(32)) {
+      startScreen = !startScreen;
+      userInfo = true;
+    }
+  }
+  else if (!startScreen) {
+    if (keyIsDown(68)) {
+      if (leftTank.x >= 0) {
+        leftTank.x++;
+      }
+    }
+    if (keyIsDown(65)) {
+      if (leftTank.x > 0) {
+        leftTank.x--;
+      }
+    }
+    // if (keyIsDown(32)) {
+    //   leftTank.x = mouseX;
+    //   leftTank.y = mouseY;
+    // }
+  }
+
+}
+
+function mousePressed() {
+  // Mouse interaction
+  if (mouseIsPressed) {
+    leftTank.shootBullet(leftTank.x, leftTank.y);
+  }
+}
+
+function interfaceScreens() {
+  if (startScreen && !userInfo) {
+    rect(width/2, 100, 100, 75);
+    textSize(18);
+    text("Press ENTER to start!", width/2, height/2);
+  }
+  else if (!startScreen && userInfo) {
+    textSize(18);
+    text("Enter left tank name:", width*0.25, height/2);
+    text("Enter right tank name:", width*0.75, height/2);
+  }
+}
+
+function main() {
   let turn = random(0, 1);
   if (turn > 0) {
     rightTurn = true;
@@ -25,42 +91,6 @@ function setup() {
   else {
     leftTurn = true;
     rightTurn = false;
-  }
-}
-
-function draw() {
-  background(0);
-  keyPressed();
-
-  leftTank.update();
-  leftTank.display();
-  displayTerrain();
-  showPower(leftTank.bulletSpeed);
-}
-
-function keyPressed() {
-
-  // Keyboard interaction
-  if (keyIsDown(68)) {
-    if (leftTank.x >= 0) {
-      leftTank.x++;
-    }
-  }
-  if (keyIsDown(65)) {
-    if (leftTank.x > 0) {
-      leftTank.x--;
-    }
-  }
-  if (keyIsDown(32)) {
-    leftTank.x = mouseX;
-    leftTank.y = mouseY;
-  }
-}
-
-function mousePressed() {
-  // Mouse interaction
-  if (mouseIsPressed) {
-    leftTank.shootBullet(leftTank.x, leftTank.y);
   }
 }
 
@@ -76,15 +106,8 @@ function mouseWheel(event) {
   }
 }
 
-function showPower(diameter) {
-  fill(255, 255, 0, 30);
-  circle(leftTank.x + leftTank.width/2, leftTank.y + leftTank.height/2, 100);
-  fill(255, 255, 0, 50);
-  circle(leftTank.x + leftTank.width/2, leftTank.y + leftTank.height/2, (diameter - 3) * 10);
-}
-
 function displayTerrain() {
-  let theWidth = width/rectHeights.length;
+  theWidth = width/rectHeights.length;
   for (let i=0; i<rectHeights.length; i++) {
     fill(255);
     noStroke();
@@ -101,20 +124,6 @@ function generateTerrain() {
   }
 }
 
-function physics() {
-  // for (let i=0; i<rectHeights.length; i++) {
-  //   if (this.y < height - rectHeights[i] - 20) {
-  //     this.y += 1;
-  //     console.log(this.y);
-  //     console.log(height - rectHeights[i] - 20);
-  //     circle(100, 20, 50);
-  //     if (this.y >= height - rectHeights[i] - 20) {
-  //       this.y = height - rectHeights[i] - 20;
-  //     }
-  //   }
-  // }
-}
-
 class Tank {
   constructor(x, y) {
     this.x = x;
@@ -126,11 +135,21 @@ class Tank {
   }
 
   display() {
+
+    // Show bullet power representation
+    fill(255, 255, 0, 30);
+    circle(this.x + this.width/2, this.y + this.height/2, 100);
+    fill(255, 255, 0, 50);
+    circle(this.x + this.width/2, this.y + this.height/2, (this.bulletSpeed - 3) * 10);
+
+    // Show tank
     fill("red");
     rect(this.x, this.y, this.width, this.height);
   }
 
   update() {
+
+    // Update/remove bullet
     for (let bullet of this.bulletArray) {
       bullet.update();
       bullet.display();
@@ -140,7 +159,24 @@ class Tank {
     }
   }
 
+  physics() {
+
+    // Tank interaction with physical objects
+    for (let i=0; i<rectHeights.length; i++) {
+      tankTouchGround = collidePointRect(mouseX, mouseY, theWidth*i, height - rectHeights[i], 10, rectHeights[i]);
+
+      if (!tankTouchGround) {
+        this.y += 1;
+        if (this.y >= height - rectHeights[i]) {
+          this.y = height - rectHeights[i];
+        }
+      }
+    }
+  }
+
   shootBullet(x, y) {
+
+    // Aiming and shooting the bullet
     angleMode(DEGREES);
     let angleToMouse = atan2(mouseY - this.y, mouseX - this.x);
     
