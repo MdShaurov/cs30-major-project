@@ -10,14 +10,14 @@ let leftTurn, rightTurn;
 let rectHeights = [];
 let numberOfRects;
 let gameOn;
-let userInfo, theWidth;
+let userInfo, rectWidth;
 let startScreen = true;
 let tankTouchGround;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  numberOfRects = width/15;
+  numberOfRects = width/10;
   generateTerrain();
 
   leftTank = new Tank(100, 100);
@@ -27,7 +27,8 @@ function draw() {
   background(0);
   displayTerrain();
   keyPressed();
-  console.log(tankTouchGround);
+
+  interfaceScreens();
 
   leftTank.physics();
   leftTank.update();
@@ -71,6 +72,7 @@ function mousePressed() {
 
 function interfaceScreens() {
   if (startScreen && !userInfo) {
+    rectMode(CENTER);
     rect(width/2, 100, 100, 75);
     textSize(18);
     text("Press ENTER to start!", width/2, height/2);
@@ -107,11 +109,12 @@ function mouseWheel(event) {
 }
 
 function displayTerrain() {
-  theWidth = width/rectHeights.length;
+  rectWidth = width/rectHeights.length;
+  rectMode(CORNER);
   for (let i=0; i<rectHeights.length; i++) {
     fill(255);
     noStroke();
-    rect(theWidth*i, height - rectHeights[i], 10, rectHeights[i]);
+    rect(rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
   }
 }
 
@@ -138,9 +141,9 @@ class Tank {
 
     // Show bullet power representation
     fill(255, 255, 0, 30);
-    circle(this.x + this.width/2, this.y + this.height/2, 100);
+    circle(this.x, this.y, 100);
     fill(255, 255, 0, 50);
-    circle(this.x + this.width/2, this.y + this.height/2, (this.bulletSpeed - 3) * 10);
+    circle(this.x, this.y, (this.bulletSpeed - 3) * 10);
 
     // Show tank
     fill("red");
@@ -163,15 +166,22 @@ class Tank {
 
     // Tank interaction with physical objects
     for (let i=0; i<rectHeights.length; i++) {
-      tankTouchGround = collidePointRect(mouseX, mouseY, theWidth*i, height - rectHeights[i], 10, rectHeights[i]);
+      tankTouchGround = collidePointRect(mouseX, mouseY, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
+      if (tankTouchGround) {
+        break;
+      }
+    }
 
+    for (let j=0; j<rectHeights.length; j++) {
       if (!tankTouchGround) {
         this.y += 1;
-        if (this.y >= height - rectHeights[i]) {
-          this.y = height - rectHeights[i];
+        if (this.y >= height - rectHeights[j] - this.height/2) {
+          this.y = height - rectHeights[j] - this.height/2;
+          break;
         }
       }
     }
+
   }
 
   shootBullet(x, y) {
