@@ -12,7 +12,15 @@ let numberOfRects;
 let gameOn;
 let userInfo, rectWidth;
 let startScreen = true;
-let tankTouchGround;
+let tankTouchGround, shellshockLogoImg;
+let leftTextBox, rightTextBox, leftInputButton, rightInputButton;
+let leftTankName, rightTankName;
+let leftTankReady = false;
+let rightTankReady= false;
+
+function preload() {
+  shellshockLogoImg = loadImage("assets/shellshock-logo.png");
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -30,16 +38,14 @@ function draw() {
 
   interfaceScreens();
 
-  leftTank.physics();
-  leftTank.update();
-  leftTank.display();
-
+  // leftTank.physics();
+  // leftTank.update();
+  // leftTank.display();
 }
 
 function keyPressed() {
-
   if (startScreen) {
-    if (keyIsDown(32)) {
+    if (keyIsDown(13)) {
       startScreen = !startScreen;
       userInfo = true;
     }
@@ -60,39 +66,13 @@ function keyPressed() {
     //   leftTank.y = mouseY;
     // }
   }
-
 }
 
 function mousePressed() {
+
   // Mouse interaction
   if (mouseIsPressed) {
     leftTank.shootBullet(leftTank.x, leftTank.y);
-  }
-}
-
-function interfaceScreens() {
-  if (startScreen && !userInfo) {
-    rectMode(CENTER);
-    rect(width/2, 100, 100, 75);
-    textSize(18);
-    text("Press ENTER to start!", width/2, height/2);
-  }
-  else if (!startScreen && userInfo) {
-    textSize(18);
-    text("Enter left tank name:", width*0.25, height/2);
-    text("Enter right tank name:", width*0.75, height/2);
-  }
-}
-
-function main() {
-  let turn = random(0, 1);
-  if (turn > 0) {
-    rightTurn = true;
-    leftTurn = false;
-  }
-  else {
-    leftTurn = true;
-    rightTurn = false;
   }
 }
 
@@ -105,6 +85,68 @@ function mouseWheel(event) {
     else if (leftTank.bulletSpeed >= 14) {
       leftTank.bulletSpeed = 13;
     }
+  }
+}
+
+function main() {
+  let turn = random(0, 100);
+  if (turn > 50) {
+    rightTurn = true;
+    leftTurn = false;
+  }
+  else {
+    leftTurn = true;
+    rightTurn = false;
+  }
+}
+
+function interfaceScreens() {
+
+  if (startScreen || userInfo) {
+    imageMode(CENTER);
+    image(shellshockLogoImg, width/2, height/5);
+  }
+  if (startScreen && !userInfo) {
+    textSize(20);
+    textAlign(CENTER);
+    text("Press ENTER to start!", width/2, height/2);
+  }
+  else if (!startScreen && userInfo) {
+
+    // Text box & button for name of left tank input
+    leftTextBox = createInput("");
+    leftTextBox.size(150, 20);
+    leftTextBox.position(width/4 - leftTextBox.width/2, height/2 - leftTextBox.height);
+
+    leftInputButton = createButton("Submit");
+    leftInputButton.position(width/4 - leftInputButton.width/2, height/2 + leftTextBox.height/3);
+
+    // Text box & button for name of right tank input
+    rightTextBox = createInput("");
+    rightTextBox.size(150, 20);
+    rightTextBox.position(width*0.75 - rightTextBox.width/2, height/2 - rightTextBox.height);
+
+    rightInputButton = createButton("Submit");
+    rightInputButton.position(width*0.75 - rightInputButton.width/2, height/2 + rightTextBox.height/3);
+
+    // Name input prompt
+    textSize(24);
+    text("Enter LEFT TANK name:", width/4, height/2 - leftTextBox.height*1.5);
+    text("Enter RIGHT TANK name:", width*0.75, height/2 - rightTextBox.height*1.5);
+  }
+
+  if (leftInputButton.mousePressed(event)) {
+    leftTankName = leftTextBox.value();
+    leftTankReady = true;
+  }
+  if (rightInputButton.mousePressed(event)) {
+    rightTankName = rightTextBox.value();
+    rightTankReady = true;
+  }
+
+  if (leftTankReady === true && rightTankReady === true) {
+    userInfo = false;
+    gameOn = true;
   }
 }
 
@@ -141,12 +183,13 @@ class Tank {
 
     // Show bullet power representation
     fill(255, 255, 0, 30);
-    circle(this.x, this.y, 100);
+    circle(this.x, this.y, 150);
     fill(255, 255, 0, 50);
-    circle(this.x, this.y, (this.bulletSpeed - 3) * 10);
+    circle(this.x, this.y, (this.bulletSpeed - 3) * 15);
 
     // Show tank
     fill("red");
+    rectMode(CENTER);
     rect(this.x, this.y, this.width, this.height);
   }
 
@@ -201,6 +244,10 @@ class Bullet {
     this.y = y;
     this.speed = speed;
     this.angle = angle;
+  }
+
+  physics() {
+
   }
 
   update() {
