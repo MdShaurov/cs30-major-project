@@ -38,9 +38,9 @@ function draw() {
 
   interfaceScreens();
 
-  // leftTank.physics();
-  // leftTank.update();
-  // leftTank.display();
+  leftTank.physics();
+  leftTank.update();
+  leftTank.display();
 }
 
 function keyPressed() {
@@ -85,20 +85,6 @@ function mouseWheel(event) {
     else if (leftTank.bulletSpeed >= 14) {
       leftTank.bulletSpeed = 13;
     }
-
-function interfaceScreens() {
-  if (startScreen && !userInfo) {
-    rectMode(CENTER);
-    rect(width/2, 100, 100, 75);
-    textAlign(CENTER);
-    textSize(18);
-    text("Press ENTER to start!", width/2, height/2);
-  }
-  else if (!startScreen && userInfo) {
-    textSize(18);
-    textAlign(CENTER);
-    text("Enter left tank name:", width*0.25, height/2);
-    text("Enter right tank name:", width*0.75, height/2);
   }
 }
 
@@ -147,15 +133,6 @@ function interfaceScreens() {
     textSize(24);
     text("Enter LEFT TANK name:", width/4, height/2 - leftTextBox.height*1.5);
     text("Enter RIGHT TANK name:", width*0.75, height/2 - rightTextBox.height*1.5);
-  }
-
-  if (leftInputButton.mousePressed(event)) {
-    leftTankName = leftTextBox.value();
-    leftTankReady = true;
-  }
-  if (rightInputButton.mousePressed(event)) {
-    rightTankName = rightTextBox.value();
-    rightTankReady = true;
   }
 
   if (leftTankReady === true && rightTankReady === true) {
@@ -224,21 +201,17 @@ class Tank {
 
     // Tank interaction with physical objects
     for (let i=0; i<rectHeights.length; i++) {
-      tankTouchGround = collidePointRect(mouseX, mouseY, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
-      if (tankTouchGround) {
-        break;
-      }
-    }
+      tankTouchGround = collidePointRect(this.x, mouseY + this.height/2, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
 
-    for (let j=0; j<rectHeights.length; j++) {
-      if (!tankTouchGround) {
+      while (!tankTouchGround) {
         this.y += 1;
-        if (this.y >= height - rectHeights[j] - this.height/2) {
-          this.y = height - rectHeights[j] - this.height/2;
+        if (this.y >= height - rectHeights[i] - this.height/2) {
+          this.y = height - rectHeights[i] - this.height/2;
           break;
         }
       }
     }
+
 
   }
 
@@ -268,6 +241,7 @@ class Bullet {
   update() {
     this.x += cos(this.angle) * this.speed;
     this.y += sin(this.angle) * this.speed;
+    console.log(this.y);
   }
 
   display() {
