@@ -61,10 +61,10 @@ function keyPressed() {
         leftTank.x--;
       }
     }
-    // if (keyIsDown(32)) {
-    //   leftTank.x = mouseX;
-    //   leftTank.y = mouseY;
-    // }
+    if (keyIsDown(32)) {
+      leftTank.x = mouseX;
+      leftTank.y = mouseY;
+    }
   }
 }
 
@@ -76,6 +76,7 @@ function mousePressed() {
   }
 }
 
+<<<<<<< Updated upstream
 function mouseWheel(event) {
   if (leftTank.bulletSpeed >= 3 && leftTank.bulletSpeed <= 13) {
     leftTank.bulletSpeed -= event.delta/100;
@@ -85,6 +86,21 @@ function mouseWheel(event) {
     else if (leftTank.bulletSpeed >= 14) {
       leftTank.bulletSpeed = 13;
     }
+=======
+function interfaceScreens() {
+  if (startScreen && !userInfo) {
+    rectMode(CENTER);
+    rect(width/2, 100, 100, 75);
+    textAlign(CENTER);
+    textSize(18);
+    text("Press ENTER to start!", width/2, height/2);
+  }
+  else if (!startScreen && userInfo) {
+    textSize(18);
+    textAlign(CENTER);
+    text("Enter left tank name:", width*0.25, height/2);
+    text("Enter right tank name:", width*0.75, height/2);
+>>>>>>> Stashed changes
   }
 }
 
@@ -182,6 +198,7 @@ class Tank {
   display() {
 
     // Show bullet power representation
+    rectMode(CENTER);
     fill(255, 255, 0, 30);
     circle(this.x, this.y, 150);
     fill(255, 255, 0, 50);
