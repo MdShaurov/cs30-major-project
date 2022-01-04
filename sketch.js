@@ -76,7 +76,6 @@ function mousePressed() {
   }
 }
 
-<<<<<<< Updated upstream
 function mouseWheel(event) {
   if (leftTank.bulletSpeed >= 3 && leftTank.bulletSpeed <= 13) {
     leftTank.bulletSpeed -= event.delta/100;
@@ -86,7 +85,7 @@ function mouseWheel(event) {
     else if (leftTank.bulletSpeed >= 14) {
       leftTank.bulletSpeed = 13;
     }
-=======
+
 function interfaceScreens() {
   if (startScreen && !userInfo) {
     rectMode(CENTER);
@@ -100,7 +99,6 @@ function interfaceScreens() {
     textAlign(CENTER);
     text("Enter left tank name:", width*0.25, height/2);
     text("Enter right tank name:", width*0.75, height/2);
->>>>>>> Stashed changes
   }
 }
 
