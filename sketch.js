@@ -40,14 +40,6 @@ function draw() {
   leftTank.physics();
   leftTank.update();
   leftTank.display();
-
-<<<<<<< HEAD
-  console.log(tankTouchGround);
-=======
-  leftTank.physics();
-  leftTank.update();
-  leftTank.display();
->>>>>>> 6a9ee65fd7a3eb0d75cae68e7dfe98f8ee4a7454
 }
 
 function keyPressed() {
@@ -64,13 +56,6 @@ function keyPressed() {
     if (leftTank.x > 0) {
       leftTank.x--;
     }
-<<<<<<< HEAD
-=======
-    if (keyIsDown(32)) {
-      leftTank.x = mouseX;
-      leftTank.y = mouseY;
-    }
->>>>>>> 6a9ee65fd7a3eb0d75cae68e7dfe98f8ee4a7454
   }
   // if (keyIsDown(32)) {
   //   leftTank.x = mouseX;
@@ -82,6 +67,7 @@ function mousePressed() {
 
   // Mouse interaction
   if (mouseIsPressed) {
+    rectMode(CENTER);
     leftTank.shootBullet(leftTank.x, leftTank.y);
   }
 }
@@ -98,73 +84,6 @@ function mouseWheel(event) {
   }
 }
 
-<<<<<<< HEAD
-// function main() {
-//   let turn = random(0, 100);
-//   if (turn > 50) {
-//     rightTurn = true;
-//     leftTurn = false;
-//   }
-//   else {
-//     leftTurn = true;
-//     rightTurn = false;
-//   }
-// }
-
-// function interfaceScreens() {
-
-//   if (startScreen || userInfo) {
-//     imageMode(CENTER);
-//     image(shellshockLogoImg, width/2, height/5);
-//   }
-//   if (startScreen && !userInfo) {
-//     textSize(20);
-//     textAlign(CENTER);
-//     text("Press ENTER to start!", width/2, height/2);
-//   }
-//   else if (!startScreen && userInfo) {
-
-//     // Text box & button for name of left tank input
-//     leftTextBox = createInput("");
-//     leftTextBox.size(150, 20);
-//     leftTextBox.position(width/4 - leftTextBox.width/2, height/2 - leftTextBox.height);
-
-//     leftInputButton = createButton("Submit");
-//     leftInputButton.position(width/4 - leftInputButton.width/2, height/2 + leftTextBox.height/3);
-//     leftInputButton.mousePressed(leftTankSetGame);
-
-//     // Text box & button for name of right tank input
-//     rightTextBox = createInput("");
-//     rightTextBox.size(150, 20);
-//     rightTextBox.position(width*0.75 - rightTextBox.width/2, height/2 - rightTextBox.height);
-
-//     rightInputButton = createButton("Submit");
-//     rightInputButton.position(width*0.75 - rightInputButton.width/2, height/2 + rightTextBox.height/3);
-//     rightInputButton.mousePressed(rightTankSetGame);
-
-//     // Name input prompt
-//     textSize(24);
-//     text("Enter LEFT TANK name:", width/4, height/2 - leftTextBox.height*1.5);
-//     text("Enter RIGHT TANK name:", width*0.75, height/2 - rightTextBox.height*1.5);
-//   }
-
-//   // Condition for the game start
-//   if (leftTankReady === true && rightTankReady === true) {
-//     userInfo = false;
-//     gameOn = true;
-//   }
-// }
-
-// function leftTankSetGame() {
-//   leftTankName = leftTextBox.value();
-//   leftTankReady = true;
-// }
-
-// function rightTankSetGame() {
-//   rightTankName = rightTextBox.value();
-//   rightTankReady = true;
-// }
-=======
 function main() {
   let turn = random(0, 100);
   if (turn > 50) {
@@ -217,7 +136,6 @@ function interfaceScreens() {
     gameOn = true;
   }
 }
->>>>>>> 6a9ee65fd7a3eb0d75cae68e7dfe98f8ee4a7454
 
 function displayTerrain() {
   rectWidth = width/rectHeights.length;
@@ -246,21 +164,29 @@ class Tank {
     this.height = 20;
     this.bulletArray = [];
     this.bulletSpeed = 3;
+    this.health = 100;
   }
 
   display() {
-
     // Show bullet power representation
-    rectMode(CENTER);
-    fill(255, 255, 0, 30);
-    circle(this.x, this.y, 150);
-    fill(255, 255, 0, 50);
-    circle(this.x, this.y, (this.bulletSpeed - 3) * 15);
+    if(!this.isDead()) {
+      rectMode(CENTER);
+      fill(255, 255, 0, 30);
+      circle(this.x, this.y, 150);
+      fill(255, 255, 0, 50);
+      circle(this.x, this.y, (this.bulletSpeed - 3) * 15);
 
-    // Show tank
-    fill("red");
-    rectMode(CENTER);
-    rect(this.x, this.y, this.width, this.height);
+      // Show tank
+      fill("red");
+      rectMode(CENTER);
+      rect(this.x, this.y, this.width, this.height);
+    
+
+      fill("green");
+      rectMode(RIGHT);
+      rectMode(LEFT);
+      rect(this.x, this.y + this.height - height/2 - 20, this.health/2, 10);
+    }
   }
 
   update() {
@@ -273,26 +199,19 @@ class Tank {
         this.bulletArray.shift();
       }
     }
+
+    // if (bullet.x > this.x - this.width/2 && bullet.x < this.x + this.width/2 && bullet.y > this.y - height/2 && bullet.y < this.y + height/2) {
+    //   this.health -= 20;
+    //   this.bulletArray.shift();
+    // }
+    
   }
 
   physics() {
 
     // Tank interaction with physical objects
     for (let i=0; i<rectHeights.length; i++) {
-<<<<<<< HEAD
-      tankTouchGround = collidePointRect(this.x + this.width/2, this.y + this.height/2, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
-      if (tankTouchGround) {
-        break;
-      }
-      else if (!tankTouchGround){
-        this.y += 1;
-        if (this.y >= height - rectHeights[i] - this.height/2) {
-          this.y = height - rectHeights[i] - this.height/2;
-        }
-      }
-    }
-=======
-      tankTouchGround = collidePointRect(this.x, mouseY + this.height/2, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
+      tankTouchGround = collidePointRect(this.x, this.y + this.height/2, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
 
       while (!tankTouchGround) {
         this.y += 1;
@@ -303,8 +222,12 @@ class Tank {
       }
     }
 
+  }
 
->>>>>>> 6a9ee65fd7a3eb0d75cae68e7dfe98f8ee4a7454
+  isDead() {
+    if (this.health <= 0) {
+      return true;
+    }
   }
 
   shootBullet(x, y) {
@@ -322,21 +245,22 @@ class Bullet {
   constructor(x, y, angle, speed) {
     this.x = x;
     this.y = y;
-    this.speed = speed;
+    this.speedX = speed;
+    this.speedY = speed;
     this.angle = angle;
   }
 
   physics() {
-
   }
 
   update() {
-    this.x += cos(this.angle) * this.speed;
-    this.y += sin(this.angle) * this.speed;
-    console.log(this.y);
+    this.speedY -= 0.07;
+    this.x += cos(this.angle) * this.speedX;
+    this.y += sin(this.angle) * this.speedY;
   }
 
   display() {
+    rectMode(CENTER);
     fill(255);
     circle(this.x, this.y, 5);
   }
