@@ -41,7 +41,13 @@ function draw() {
   leftTank.update();
   leftTank.display();
 
+<<<<<<< HEAD
   console.log(tankTouchGround);
+=======
+  leftTank.physics();
+  leftTank.update();
+  leftTank.display();
+>>>>>>> 6a9ee65fd7a3eb0d75cae68e7dfe98f8ee4a7454
 }
 
 function keyPressed() {
@@ -58,6 +64,13 @@ function keyPressed() {
     if (leftTank.x > 0) {
       leftTank.x--;
     }
+<<<<<<< HEAD
+=======
+    if (keyIsDown(32)) {
+      leftTank.x = mouseX;
+      leftTank.y = mouseY;
+    }
+>>>>>>> 6a9ee65fd7a3eb0d75cae68e7dfe98f8ee4a7454
   }
   // if (keyIsDown(32)) {
   //   leftTank.x = mouseX;
@@ -85,6 +98,7 @@ function mouseWheel(event) {
   }
 }
 
+<<<<<<< HEAD
 // function main() {
 //   let turn = random(0, 100);
 //   if (turn > 50) {
@@ -150,6 +164,60 @@ function mouseWheel(event) {
 //   rightTankName = rightTextBox.value();
 //   rightTankReady = true;
 // }
+=======
+function main() {
+  let turn = random(0, 100);
+  if (turn > 50) {
+    rightTurn = true;
+    leftTurn = false;
+  }
+  else {
+    leftTurn = true;
+    rightTurn = false;
+  }
+}
+
+function interfaceScreens() {
+
+  if (startScreen || userInfo) {
+    imageMode(CENTER);
+    image(shellshockLogoImg, width/2, height/5);
+  }
+  if (startScreen && !userInfo) {
+    textSize(20);
+    textAlign(CENTER);
+    text("Press ENTER to start!", width/2, height/2);
+  }
+  else if (!startScreen && userInfo) {
+
+    // Text box & button for name of left tank input
+    leftTextBox = createInput("");
+    leftTextBox.size(150, 20);
+    leftTextBox.position(width/4 - leftTextBox.width/2, height/2 - leftTextBox.height);
+
+    leftInputButton = createButton("Submit");
+    leftInputButton.position(width/4 - leftInputButton.width/2, height/2 + leftTextBox.height/3);
+
+    // Text box & button for name of right tank input
+    rightTextBox = createInput("");
+    rightTextBox.size(150, 20);
+    rightTextBox.position(width*0.75 - rightTextBox.width/2, height/2 - rightTextBox.height);
+
+    rightInputButton = createButton("Submit");
+    rightInputButton.position(width*0.75 - rightInputButton.width/2, height/2 + rightTextBox.height/3);
+
+    // Name input prompt
+    textSize(24);
+    text("Enter LEFT TANK name:", width/4, height/2 - leftTextBox.height*1.5);
+    text("Enter RIGHT TANK name:", width*0.75, height/2 - rightTextBox.height*1.5);
+  }
+
+  if (leftTankReady === true && rightTankReady === true) {
+    userInfo = false;
+    gameOn = true;
+  }
+}
+>>>>>>> 6a9ee65fd7a3eb0d75cae68e7dfe98f8ee4a7454
 
 function displayTerrain() {
   rectWidth = width/rectHeights.length;
@@ -183,6 +251,7 @@ class Tank {
   display() {
 
     // Show bullet power representation
+    rectMode(CENTER);
     fill(255, 255, 0, 30);
     circle(this.x, this.y, 150);
     fill(255, 255, 0, 50);
@@ -210,6 +279,7 @@ class Tank {
 
     // Tank interaction with physical objects
     for (let i=0; i<rectHeights.length; i++) {
+<<<<<<< HEAD
       tankTouchGround = collidePointRect(this.x + this.width/2, this.y + this.height/2, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
       if (tankTouchGround) {
         break;
@@ -221,6 +291,20 @@ class Tank {
         }
       }
     }
+=======
+      tankTouchGround = collidePointRect(this.x, mouseY + this.height/2, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
+
+      while (!tankTouchGround) {
+        this.y += 1;
+        if (this.y >= height - rectHeights[i] - this.height/2) {
+          this.y = height - rectHeights[i] - this.height/2;
+          break;
+        }
+      }
+    }
+
+
+>>>>>>> 6a9ee65fd7a3eb0d75cae68e7dfe98f8ee4a7454
   }
 
   shootBullet(x, y) {
@@ -249,6 +333,7 @@ class Bullet {
   update() {
     this.x += cos(this.angle) * this.speed;
     this.y += sin(this.angle) * this.speed;
+    console.log(this.y);
   }
 
   display() {
