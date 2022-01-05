@@ -25,7 +25,8 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  numberOfRects = width/10;
+
+  numberOfRects = width;
   generateTerrain();
 
   leftTank = new Tank(100, 100);
@@ -36,36 +37,32 @@ function draw() {
   displayTerrain();
   keyPressed();
 
-  interfaceScreens();
+  leftTank.physics();
+  leftTank.update();
+  leftTank.display();
 
-  // leftTank.physics();
-  // leftTank.update();
-  // leftTank.display();
+  console.log(tankTouchGround);
 }
 
 function keyPressed() {
-  if (startScreen) {
-    if (keyIsDown(13)) {
-      startScreen = !startScreen;
-      userInfo = true;
+  if (keyIsDown(13)) {
+    startScreen = !startScreen;
+    userInfo = true;
+  }
+  if (keyIsDown(68)) {
+    if (leftTank.x >= 0) {
+      leftTank.x++;
     }
   }
-  else if (!startScreen) {
-    if (keyIsDown(68)) {
-      if (leftTank.x >= 0) {
-        leftTank.x++;
-      }
+  if (keyIsDown(65)) {
+    if (leftTank.x > 0) {
+      leftTank.x--;
     }
-    if (keyIsDown(65)) {
-      if (leftTank.x > 0) {
-        leftTank.x--;
-      }
-    }
-    // if (keyIsDown(32)) {
-    //   leftTank.x = mouseX;
-    //   leftTank.y = mouseY;
-    // }
   }
+  // if (keyIsDown(32)) {
+  //   leftTank.x = mouseX;
+  //   leftTank.y = mouseY;
+  // }
 }
 
 function mousePressed() {
@@ -88,67 +85,71 @@ function mouseWheel(event) {
   }
 }
 
-function main() {
-  let turn = random(0, 100);
-  if (turn > 50) {
-    rightTurn = true;
-    leftTurn = false;
-  }
-  else {
-    leftTurn = true;
-    rightTurn = false;
-  }
-}
+// function main() {
+//   let turn = random(0, 100);
+//   if (turn > 50) {
+//     rightTurn = true;
+//     leftTurn = false;
+//   }
+//   else {
+//     leftTurn = true;
+//     rightTurn = false;
+//   }
+// }
 
-function interfaceScreens() {
+// function interfaceScreens() {
 
-  if (startScreen || userInfo) {
-    imageMode(CENTER);
-    image(shellshockLogoImg, width/2, height/5);
-  }
-  if (startScreen && !userInfo) {
-    textSize(20);
-    textAlign(CENTER);
-    text("Press ENTER to start!", width/2, height/2);
-  }
-  else if (!startScreen && userInfo) {
+//   if (startScreen || userInfo) {
+//     imageMode(CENTER);
+//     image(shellshockLogoImg, width/2, height/5);
+//   }
+//   if (startScreen && !userInfo) {
+//     textSize(20);
+//     textAlign(CENTER);
+//     text("Press ENTER to start!", width/2, height/2);
+//   }
+//   else if (!startScreen && userInfo) {
 
-    // Text box & button for name of left tank input
-    leftTextBox = createInput("");
-    leftTextBox.size(150, 20);
-    leftTextBox.position(width/4 - leftTextBox.width/2, height/2 - leftTextBox.height);
+//     // Text box & button for name of left tank input
+//     leftTextBox = createInput("");
+//     leftTextBox.size(150, 20);
+//     leftTextBox.position(width/4 - leftTextBox.width/2, height/2 - leftTextBox.height);
 
-    leftInputButton = createButton("Submit");
-    leftInputButton.position(width/4 - leftInputButton.width/2, height/2 + leftTextBox.height/3);
+//     leftInputButton = createButton("Submit");
+//     leftInputButton.position(width/4 - leftInputButton.width/2, height/2 + leftTextBox.height/3);
+//     leftInputButton.mousePressed(leftTankSetGame);
 
-    // Text box & button for name of right tank input
-    rightTextBox = createInput("");
-    rightTextBox.size(150, 20);
-    rightTextBox.position(width*0.75 - rightTextBox.width/2, height/2 - rightTextBox.height);
+//     // Text box & button for name of right tank input
+//     rightTextBox = createInput("");
+//     rightTextBox.size(150, 20);
+//     rightTextBox.position(width*0.75 - rightTextBox.width/2, height/2 - rightTextBox.height);
 
-    rightInputButton = createButton("Submit");
-    rightInputButton.position(width*0.75 - rightInputButton.width/2, height/2 + rightTextBox.height/3);
+//     rightInputButton = createButton("Submit");
+//     rightInputButton.position(width*0.75 - rightInputButton.width/2, height/2 + rightTextBox.height/3);
+//     rightInputButton.mousePressed(rightTankSetGame);
 
-    // Name input prompt
-    textSize(24);
-    text("Enter LEFT TANK name:", width/4, height/2 - leftTextBox.height*1.5);
-    text("Enter RIGHT TANK name:", width*0.75, height/2 - rightTextBox.height*1.5);
-  }
+//     // Name input prompt
+//     textSize(24);
+//     text("Enter LEFT TANK name:", width/4, height/2 - leftTextBox.height*1.5);
+//     text("Enter RIGHT TANK name:", width*0.75, height/2 - rightTextBox.height*1.5);
+//   }
 
-  if (leftInputButton.mousePressed(event)) {
-    leftTankName = leftTextBox.value();
-    leftTankReady = true;
-  }
-  if (rightInputButton.mousePressed(event)) {
-    rightTankName = rightTextBox.value();
-    rightTankReady = true;
-  }
+//   // Condition for the game start
+//   if (leftTankReady === true && rightTankReady === true) {
+//     userInfo = false;
+//     gameOn = true;
+//   }
+// }
 
-  if (leftTankReady === true && rightTankReady === true) {
-    userInfo = false;
-    gameOn = true;
-  }
-}
+// function leftTankSetGame() {
+//   leftTankName = leftTextBox.value();
+//   leftTankReady = true;
+// }
+
+// function rightTankSetGame() {
+//   rightTankName = rightTextBox.value();
+//   rightTankReady = true;
+// }
 
 function displayTerrain() {
   rectWidth = width/rectHeights.length;
@@ -209,22 +210,17 @@ class Tank {
 
     // Tank interaction with physical objects
     for (let i=0; i<rectHeights.length; i++) {
-      tankTouchGround = collidePointRect(mouseX, mouseY, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
+      tankTouchGround = collidePointRect(this.x + this.width/2, this.y + this.height/2, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
       if (tankTouchGround) {
         break;
       }
-    }
-
-    for (let j=0; j<rectHeights.length; j++) {
-      if (!tankTouchGround) {
+      else if (!tankTouchGround){
         this.y += 1;
-        if (this.y >= height - rectHeights[j] - this.height/2) {
-          this.y = height - rectHeights[j] - this.height/2;
-          break;
+        if (this.y >= height - rectHeights[i] - this.height/2) {
+          this.y = height - rectHeights[i] - this.height/2;
         }
       }
     }
-
   }
 
   shootBullet(x, y) {
