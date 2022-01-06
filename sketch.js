@@ -5,6 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
+let shellshockLogoImg;
 let leftTank, rightTank, bullet;
 let leftTurn, rightTurn;
 let rectHeights = [];
@@ -12,7 +13,7 @@ let numberOfRects;
 let gameOn;
 let userInfo, rectWidth;
 let startScreen = true;
-let tankTouchGround, shellshockLogoImg;
+let tankTouchGround;
 let leftTextBox, rightTextBox, leftInputButton, rightInputButton;
 let leftTankName, rightTankName;
 let leftTankReady = false;
@@ -37,6 +38,7 @@ function draw() {
   displayTerrain();
   keyPressed();
 
+
   leftTank.physics();
   leftTank.update();
   leftTank.display();
@@ -48,12 +50,12 @@ function keyPressed() {
     userInfo = true;
   }
   if (keyIsDown(68)) {
-    if (leftTank.x >= 0) {
+    if (leftTank.x >= 0 + leftTank.width/2 && leftTank.x < width - leftTank.width/2) {
       leftTank.x++;
     }
   }
   if (keyIsDown(65)) {
-    if (leftTank.x > 0) {
+    if (leftTank.x > 0 + leftTank.width/2 && leftTank.x <= width - leftTank.width/2) {
       leftTank.x--;
     }
   }
@@ -65,7 +67,7 @@ function keyPressed() {
 
 function mousePressed() {
 
-  // Mouse interaction
+  // Shoots bullet
   if (mouseIsPressed) {
     rectMode(CENTER);
     leftTank.shootBullet(leftTank.x, leftTank.y);
@@ -73,13 +75,15 @@ function mousePressed() {
 }
 
 function mouseWheel(event) {
-  if (leftTank.bulletSpeed >= 3 && leftTank.bulletSpeed <= 13) {
+
+  // Increases and decreases bullet speed
+  if (leftTank.bulletSpeed >= 3 && leftTank.bulletSpeed <= 103) {
     leftTank.bulletSpeed -= event.delta/100;
     if (leftTank.bulletSpeed <= 2) {
       leftTank.bulletSpeed = 3;
     }
-    else if (leftTank.bulletSpeed >= 14) {
-      leftTank.bulletSpeed = 13;
+    else if (leftTank.bulletSpeed >= 104) {
+      leftTank.bulletSpeed = 103;
     }
   }
 }
@@ -98,11 +102,14 @@ function main() {
 
 function interfaceScreens() {
 
+  // Game logo
   if (startScreen || userInfo) {
     imageMode(CENTER);
     image(shellshockLogoImg, width/2, height/5);
   }
   if (startScreen && !userInfo) {
+
+    // Prompt to start
     textSize(20);
     textAlign(CENTER);
     text("Press ENTER to start!", width/2, height/2);
@@ -138,6 +145,8 @@ function interfaceScreens() {
 }
 
 function displayTerrain() {
+
+  // Show terrain
   rectWidth = width/rectHeights.length;
   rectMode(CORNER);
   for (let i=0; i<rectHeights.length; i++) {
@@ -148,11 +157,13 @@ function displayTerrain() {
 }
 
 function generateTerrain() {
+
+  // Generate noise array for terrain
   let time = 0;
   for (let i=0; i<numberOfRects; i++) {
     let theHeight = noise(time) * height/2;
     rectHeights.push(theHeight);
-    time += 0.002;
+    time += 0.0015;
   }
 }
 
@@ -163,29 +174,30 @@ class Tank {
     this.width = 20;
     this.height = 20;
     this.bulletArray = [];
-    this.bulletSpeed = 3;
+    this.bulletSpeed = 53;
     this.health = 100;
   }
 
   display() {
-    // Show bullet power representation
     if(!this.isDead()) {
+
+      // Show health points
+      rectMode(CENTER);
+      fill("green");
+      rect(this.x, this.y - this.height*1.5, this.health/2, 10);
+
+      // Show bullet power representation
       rectMode(CENTER);
       fill(255, 255, 0, 30);
       circle(this.x, this.y, 150);
-      fill(255, 255, 0, 50);
-      circle(this.x, this.y, (this.bulletSpeed - 3) * 15);
+      fill(255, 255, 0, 60);
+      circle(this.x, this.y, (this.bulletSpeed - 3)*1.5);
 
       // Show tank
       fill("red");
       rectMode(CENTER);
       rect(this.x, this.y, this.width, this.height);
-    
-
-      fill("green");
-      rectMode(RIGHT);
-      rectMode(LEFT);
-      rect(this.x, this.y + this.height - height/2 - 20, this.health/2, 10);
+  
     }
   }
 
@@ -200,19 +212,23 @@ class Tank {
       }
     }
 
-    // if (bullet.x > this.x - this.width/2 && bullet.x < this.x + this.width/2 && bullet.y > this.y - height/2 && bullet.y < this.y + height/2) {
-    //   this.health -= 20;
-    //   this.bulletArray.shift();
+    // if (this.bulletArray.length > 0) {
+    //   if (this.bulletArray[0].x > this.x - this.width/2 && bullet.x < this.x + this.width/2 && bullet.y > this.y - height/2 && bullet.y < this.y + height/2) {
+    //     this.health -= 20;
+    //     this.bulletArray.shift();
+    //   }
     // }
     
   }
 
   physics() {
 
-    // Tank interaction with physical objects
+    // Tank interaction with terrain
     for (let i=0; i<rectHeights.length; i++) {
-      tankTouchGround = collidePointRect(this.x, this.y + this.height/2, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
-
+      tankTouchGround = collidePointRect(this.x, this.y + this.height/2 + 1, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
+      if (tankTouchGround) {
+        break;
+      }
       while (!tankTouchGround) {
         this.y += 1;
         if (this.y >= height - rectHeights[i] - this.height/2) {
@@ -221,7 +237,6 @@ class Tank {
         }
       }
     }
-
   }
 
   isDead() {
@@ -236,7 +251,7 @@ class Tank {
     angleMode(DEGREES);
     let angleToMouse = atan2(mouseY - this.y, mouseX - this.x);
     
-    let bullet = new Bullet(x + this.width/2, y + this.height/2, angleToMouse, this.bulletSpeed);
+    let bullet = new Bullet(x, y, angleToMouse, (this.bulletSpeed - 3)/10);
     this.bulletArray.push(bullet);
   }
 }
@@ -254,12 +269,16 @@ class Bullet {
   }
 
   update() {
+
+    // Bullet physics
     this.speedY -= 0.07;
     this.x += cos(this.angle) * this.speedX;
     this.y += sin(this.angle) * this.speedY;
   }
 
   display() {
+
+    // Show bullet
     rectMode(CENTER);
     fill(255);
     circle(this.x, this.y, 5);
