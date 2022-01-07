@@ -7,7 +7,7 @@
 
 let shellshockLogoImg;
 let leftTank, rightTank, bullet;
-let leftTurn, rightTurn;
+let turn, leftTurn, rightTurn;
 let rectHeights = [];
 let numberOfRects;
 let gameOn;
@@ -26,11 +26,21 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-
   numberOfRects = width;
   generateTerrain();
 
   leftTank = new Tank(100, 100);
+  rightTank = new Tank(width-100, height-100);
+
+  turn = random(0, 100);
+  if (turn > 50) {
+    rightTurn = true;
+    leftTurn = false;
+  }
+  else {
+    leftTurn = true;
+    rightTurn = false;
+  }
 }
 
 function draw() {
@@ -38,15 +48,21 @@ function draw() {
   displayTerrain();
   keyPressed();
 
+  interfaceScreens();
+
 
   leftTank.physics();
   leftTank.update();
   leftTank.display();
+
+  rightTank.physics();
+  rightTank.update();
+  rightTank.display();
 }
 
 function keyPressed() {
   if (keyIsDown(13)) {
-    startScreen = !startScreen;
+    startScreen = false;
     userInfo = true;
   }
   if (keyIsDown(68)) {
@@ -68,9 +84,13 @@ function keyPressed() {
 function mousePressed() {
 
   // Shoots bullet
-  if (mouseIsPressed) {
+  if (leftTurn && mouseIsPressed) {
     rectMode(CENTER);
     leftTank.shootBullet(leftTank.x, leftTank.y);
+  }
+  else if (rightTurn && mouseIsPressed) {
+    rectMode(CENTER);
+    rightTank.shootBullet(rightTank.x, rightTank.y);
   }
 }
 
@@ -89,15 +109,7 @@ function mouseWheel(event) {
 }
 
 function main() {
-  let turn = random(0, 100);
-  if (turn > 50) {
-    rightTurn = true;
-    leftTurn = false;
-  }
-  else {
-    leftTurn = true;
-    rightTurn = false;
-  }
+
 }
 
 function interfaceScreens() {
@@ -117,7 +129,7 @@ function interfaceScreens() {
   else if (!startScreen && userInfo) {
 
     // Text box & button for name of left tank input
-    leftTextBox = createInput("");
+    leftTextBox = createInput("How so");
     leftTextBox.size(150, 20);
     leftTextBox.position(width/4 - leftTextBox.width/2, height/2 - leftTextBox.height);
 
@@ -141,6 +153,10 @@ function interfaceScreens() {
   if (leftTankReady === true && rightTankReady === true) {
     userInfo = false;
     gameOn = true;
+    leftTextBox.remove();
+    leftInputButton.remove();
+    rightTextBox.remove();
+    rightInputButton.remove();
   }
 }
 
@@ -179,7 +195,7 @@ class Tank {
   }
 
   display() {
-    if(!this.isDead()) {
+    if (!this.isDead()) {
 
       // Show health points
       rectMode(CENTER);
