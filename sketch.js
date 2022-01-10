@@ -239,6 +239,12 @@ class Tank {
 
   physics() {
 
+    angleMode(DEGREES);
+    let angleToTerrain = atan2(mouseY - this.y, mouseX - this.x);
+
+    translate(this.x, this.y);
+    rotate(angleToTerrain);
+
     // Tank interaction with terrain
     for (let i=0; i<rectHeights.length; i++) {
       tankTouchGround = collidePointRect(this.x, this.y + this.height/2 + 1, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
