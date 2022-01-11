@@ -30,7 +30,7 @@ function setup() {
   generateTerrain();
 
   leftTank = new Tank(100, 100);
-  rightTank = new Tank(width-100, height-100);
+  // rightTank = new Tank(width-100, 100);
 
   turn = random(0, 100);
   if (turn > 50) {
@@ -75,10 +75,6 @@ function keyPressed() {
       leftTank.x--;
     }
   }
-  // if (keyIsDown(32)) {
-  //   leftTank.x = mouseX;
-  //   leftTank.y = mouseY;
-  // }
 }
 
 function mousePressed() {
@@ -168,7 +164,7 @@ function displayTerrain() {
   for (let i=0; i<rectHeights.length; i++) {
     fill(255);
     noStroke();
-    rect(rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
+    rect(rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
   }
 }
 
@@ -192,6 +188,8 @@ class Tank {
     this.bulletArray = [];
     this.bulletSpeed = 53;
     this.health = 100;
+    this.angleToTerrain;
+    this.angleToMouse = 0;
   }
 
   display() {
@@ -210,9 +208,11 @@ class Tank {
       circle(this.x, this.y, (this.bulletSpeed - 3)*1.5);
 
       // Show tank
+      translate(this.x, this.y);
+      rotate(this.angleToTerrain);
       fill("red");
       rectMode(CENTER);
-      rect(this.x, this.y, this.width, this.height);
+      rect(0, 0, this.width, this.height);
   
     }
   }
@@ -239,16 +239,13 @@ class Tank {
 
   physics() {
 
-    angleMode(DEGREES);
-    let angleToTerrain = atan2(mouseY - this.y, mouseX - this.x);
-
-    translate(this.x, this.y);
-    rotate(angleToTerrain);
-
     // Tank interaction with terrain
     for (let i=0; i<rectHeights.length; i++) {
-      tankTouchGround = collidePointRect(this.x, this.y + this.height/2 + 1, rectWidth*i, height - rectHeights[i], 10, rectHeights[i]);
+
+      tankTouchGround = collidePointRect(this.x, this.y + this.height/2 + 1, rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
       if (tankTouchGround) {
+        // angleMode(DEGREES);
+        // this.angleToTerrain = atan2(height - rectHeights[i+1] - this.y, rectWidth*(i+1) - this.x);
         break;
       }
       while (!tankTouchGround) {
@@ -271,9 +268,9 @@ class Tank {
 
     // Aiming and shooting the bullet
     angleMode(DEGREES);
-    let angleToMouse = atan2(mouseY - this.y, mouseX - this.x);
+    this.angleToMouse = atan2(mouseY - this.y, mouseX - this.x);
     
-    let bullet = new Bullet(x, y, angleToMouse, (this.bulletSpeed - 3)/10);
+    let bullet = new Bullet(x, y, this.angleToMouse, (this.bulletSpeed - 3)/10);
     this.bulletArray.push(bullet);
   }
 }
