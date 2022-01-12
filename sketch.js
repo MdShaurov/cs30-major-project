@@ -14,8 +14,12 @@ let gameOn;
 let userInfo, rectWidth;
 let startScreen = true;
 let tankTouchGround;
-let leftTextBox, rightTextBox, leftInputButton, rightInputButton;
+let leftTextBox, rightTextBox, leftInputButton, rightInputButton, startElements;
 let leftTankName, rightTankName;
+let leftButtonCreate = true;
+let rightButtonCreate = true;
+let leftTextCreate = true;
+let rightTextCreate = true;
 let leftTankReady = false;
 let rightTankReady= false;
 
@@ -30,7 +34,7 @@ function setup() {
   generateTerrain();
 
   leftTank = new Tank(100, 100);
-  // rightTank = new Tank(width-100, 100);
+  rightTank = new Tank(width-100, 100);
 
   turn = random(0, 100);
   if (turn > 50) {
@@ -65,14 +69,28 @@ function keyPressed() {
     startScreen = false;
     userInfo = true;
   }
-  if (keyIsDown(68)) {
-    if (leftTank.x >= 0 + leftTank.width/2 && leftTank.x < width - leftTank.width/2) {
-      leftTank.x++;
+  if (gameOn && leftTurn) {
+    if (keyIsDown(68)) {
+      if (leftTank.x >= 0 + leftTank.width/2 && leftTank.x < width - leftTank.width/2) {
+        leftTank.x++;
+      }
+    }
+    if (keyIsDown(65)) {
+      if (leftTank.x > 0 + leftTank.width/2 && leftTank.x <= width - leftTank.width/2) {
+        leftTank.x--;
+      }
     }
   }
-  if (keyIsDown(65)) {
-    if (leftTank.x > 0 + leftTank.width/2 && leftTank.x <= width - leftTank.width/2) {
-      leftTank.x--;
+  if (gameOn && rightTurn) {
+    if (keyIsDown(39)) {
+      if (rightTank.x >= 0 + rightTank.width/2 && rightTank.x < width - rightTank.width/2) {
+        rightTank.x++;
+      }
+    }
+    if (keyIsDown(37)) {
+      if (rightTank.x > 0 + rightTank.width/2 && rightTank.x <= width - rightTank.width/2) {
+        rightTank.x--;
+      }
     }
   }
 }
@@ -80,26 +98,41 @@ function keyPressed() {
 function mousePressed() {
 
   // Shoots bullet
-  if (leftTurn && mouseIsPressed) {
+  if (leftTurn && mouseIsPressed && gameOn) {
     rectMode(CENTER);
     leftTank.shootBullet(leftTank.x, leftTank.y);
+    leftTurn = false;
+    rightTurn = true;
   }
-  else if (rightTurn && mouseIsPressed) {
+  else if (rightTurn && mouseIsPressed && gameOn) {
     rectMode(CENTER);
     rightTank.shootBullet(rightTank.x, rightTank.y);
+    leftTurn = true;
+    rightTurn = false;
   }
 }
 
 function mouseWheel(event) {
 
   // Increases and decreases bullet speed
-  if (leftTank.bulletSpeed >= 3 && leftTank.bulletSpeed <= 103) {
-    leftTank.bulletSpeed -= event.delta/100;
-    if (leftTank.bulletSpeed <= 2) {
-      leftTank.bulletSpeed = 3;
+  if (gameOn) {
+    if (leftTank.bulletSpeed >= 3 && leftTank.bulletSpeed <= 103 && leftTurn) {
+      leftTank.bulletSpeed -= event.delta/100;
+      if (leftTank.bulletSpeed <= 2) {
+        leftTank.bulletSpeed = 3;
+      }
+      else if (leftTank.bulletSpeed >= 104) {
+        leftTank.bulletSpeed = 103;
+      }
     }
-    else if (leftTank.bulletSpeed >= 104) {
-      leftTank.bulletSpeed = 103;
+    if (rightTank.bulletSpeed >= 3 && rightTank.bulletSpeed <= 103 && rightTurn) {
+      rightTank.bulletSpeed -= event.delta/100;
+      if (rightTank.bulletSpeed <= 2) {
+        rightTank.bulletSpeed = 3;
+      }
+      else if (rightTank.bulletSpeed >= 104) {
+        rightTank.bulletSpeed = 103;
+      }
     }
   }
 }
@@ -124,26 +157,34 @@ function interfaceScreens() {
   }
   else if (!startScreen && userInfo) {
 
-    // Text box & button for name of left tank input
-    leftTextBox = createInput("How so");
-    leftTextBox.size(150, 20);
-    leftTextBox.position(width/4 - leftTextBox.width/2, height/2 - leftTextBox.height);
-
-    leftInputButton = createButton("Submit");
-    leftInputButton.position(width/4 - leftInputButton.width/2, height/2 + leftTextBox.height/3);
-
-    // Text box & button for name of right tank input
-    rightTextBox = createInput("");
-    rightTextBox.size(150, 20);
-    rightTextBox.position(width*0.75 - rightTextBox.width/2, height/2 - rightTextBox.height);
-
-    rightInputButton = createButton("Submit");
-    rightInputButton.position(width*0.75 - rightInputButton.width/2, height/2 + rightTextBox.height/3);
-
     // Name input prompt
     textSize(24);
-    text("Enter LEFT TANK name:", width/4, height/2 - leftTextBox.height*1.5);
-    text("Enter RIGHT TANK name:", width*0.75, height/2 - rightTextBox.height*1.5);
+    text("Enter LEFT TANK name:", width/4, height/2 - 30*1.5);
+    text("Enter RIGHT TANK name:", width*0.75, height/2 - 30*1.5);
+
+    if (leftTextCreate && rightTextCreate && leftButtonCreate && rightButtonCreate) {
+      // Text box & button for name of left tank input
+      leftTextBox = createInput("Name");
+      leftTextBox.size(150, 20);
+      leftTextBox.position(width/4 - leftTextBox.width/2, height/2 - leftTextBox.height);
+      leftTextCreate = false;
+
+      leftInputButton = createButton("Submit");
+      leftInputButton.position(width/4 - leftInputButton.width/2, height/2 + leftTextBox.height/3);
+      leftInputButton.mousePressed(leftInput);
+      leftButtonCreate = false;
+
+      // Text box & button for name of right tank input
+      rightTextBox = createInput("Name");
+      rightTextBox.size(150, 20);
+      rightTextBox.position(width*0.75 - rightTextBox.width/2, height/2 - rightTextBox.height);
+      rightTextCreate = false;
+
+      rightInputButton = createButton("Submit");
+      rightInputButton.position(width*0.75 - rightInputButton.width/2, height/2 + rightTextBox.height/3);
+      rightInputButton.mousePressed(rightInput);
+      rightButtonCreate = false;
+    }
   }
 
   if (leftTankReady === true && rightTankReady === true) {
@@ -154,6 +195,14 @@ function interfaceScreens() {
     rightTextBox.remove();
     rightInputButton.remove();
   }
+}
+
+function leftInput() {
+  leftTankReady = true;
+}
+
+function rightInput() {
+  rightTankReady = true;
 }
 
 function displayTerrain() {
@@ -188,8 +237,7 @@ class Tank {
     this.bulletArray = [];
     this.bulletSpeed = 53;
     this.health = 100;
-    this.angleToTerrain;
-    this.angleToMouse = 0;
+    this.angleToTerrain, this.angleToMouse;
   }
 
   display() {
@@ -208,12 +256,21 @@ class Tank {
       circle(this.x, this.y, (this.bulletSpeed - 3)*1.5);
 
       // Show tank
+      for (let i=0; i<rectHeights.length; i++) {
+        if (i === this.x) {
+          angleMode(DEGREES);
+          this.angleToTerrain = atan2(height - rectHeights[i+1] - this.y, rectWidth*(i+1) - this.x);
+          console.log(this.angleToTerrain);
+        }
+      }
+
+      push();
+      rectMode(CENTER);
       translate(this.x, this.y);
       rotate(this.angleToTerrain);
       fill("red");
-      rectMode(CENTER);
       rect(0, 0, this.width, this.height);
-  
+      pop();
     }
   }
 
@@ -241,11 +298,8 @@ class Tank {
 
     // Tank interaction with terrain
     for (let i=0; i<rectHeights.length; i++) {
-
       tankTouchGround = collidePointRect(this.x, this.y + this.height/2 + 1, rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
       if (tankTouchGround) {
-        // angleMode(DEGREES);
-        // this.angleToTerrain = atan2(height - rectHeights[i+1] - this.y, rectWidth*(i+1) - this.x);
         break;
       }
       while (!tankTouchGround) {
