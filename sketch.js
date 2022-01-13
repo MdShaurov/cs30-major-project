@@ -11,9 +11,9 @@ let turn, leftTurn, rightTurn;
 let rectHeights = [];
 let numberOfRects;
 let gameOn;
+let removeBullet;
 let userInfo, rectWidth;
 let startScreen = true;
-let tankTouchGround;
 let leftTextBox, rightTextBox, leftInputButton, rightInputButton, startElements;
 let leftTankName, rightTankName;
 let leftButtonCreate = true;
@@ -22,6 +22,7 @@ let leftTextCreate = true;
 let rightTextCreate = true;
 let leftTankReady = false;
 let rightTankReady= false;
+let lastSwitchStart = 0;
 
 function preload() {
   shellshockLogoImg = loadImage("assets/shellshock-logo.png");
@@ -59,9 +60,9 @@ function draw() {
   leftTank.update();
   leftTank.display();
 
-  rightTank.physics();
-  rightTank.update();
-  rightTank.display();
+  // rightTank.physics();
+  // rightTank.update();
+  // rightTank.display();
 }
 
 function keyPressed() {
@@ -142,6 +143,8 @@ function main() {
 }
 
 function interfaceScreens() {
+
+  
 
   // Game logo
   if (startScreen || userInfo) {
@@ -237,7 +240,7 @@ class Tank {
     this.bulletArray = [];
     this.bulletSpeed = 53;
     this.health = 100;
-    this.angleToTerrain, this.angleToMouse;
+    this.angleToTerrain, this.angleToMouse, this.tankTouchGround;
   }
 
   display() {
@@ -259,8 +262,21 @@ class Tank {
       for (let i=0; i<rectHeights.length; i++) {
         if (i === this.x) {
           angleMode(DEGREES);
-          this.angleToTerrain = atan2(height - rectHeights[i+1] - this.y, rectWidth*(i+1) - this.x);
-          console.log(this.angleToTerrain);
+          if (this.y + this.y/2 < rectHeights[i+10]) {
+            this.angleToTerrain = atan2(height - rectHeights[i+3] - this.y, rectWidth*(i+10) - this.x);
+            console.log(this.angleToTerrain);
+            break;
+          }
+          else if (this.y + this.y/2 > rectHeights[i+10]) {
+            this.angleToTerrain = atan2(height - rectHeights[i-10] - this.y, rectWidth*(i-10) - this.x);
+            console.log(this.angleToTerrain);
+            break;
+          }
+          else {
+            this.angleToTerrain = 90;
+            console.log(this.angleToTerrain);
+            break;
+          }
         }
       }
 
@@ -279,30 +295,30 @@ class Tank {
     // Update/remove bullet
     for (let bullet of this.bulletArray) {
       bullet.update();
+      bullet.physics();
       bullet.display();
-      if (this.bulletArray.length >= 2) {
+
+      if (removeBullet) {
+        this.removeBullet = true;
+      }
+
+      if (this.bulletArray.length >= 2 || this.removeBullet || bullet.x < 0 || bullet.x > width) {
         this.bulletArray.shift();
+        removeBullet = false;
+        this.removeBullet = false;
       }
     }
-
-    // if (this.bulletArray.length > 0) {
-    //   if (this.bulletArray[0].x > this.x - this.width/2 && bullet.x < this.x + this.width/2 && bullet.y > this.y - height/2 && bullet.y < this.y + height/2) {
-    //     this.health -= 20;
-    //     this.bulletArray.shift();
-    //   }
-    // }
-    
   }
 
   physics() {
 
     // Tank interaction with terrain
     for (let i=0; i<rectHeights.length; i++) {
-      tankTouchGround = collidePointRect(this.x, this.y + this.height/2 + 1, rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
-      if (tankTouchGround) {
+      this.tankTouchGround = collidePointRect(this.x, this.y + this.height/2 + 1, rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
+      if (this.tankTouchGround) {
         break;
       }
-      while (!tankTouchGround) {
+      while (!this.tankTouchGround) {
         this.y += 1;
         if (this.y >= height - rectHeights[i] - this.height/2) {
           this.y = height - rectHeights[i] - this.height/2;
@@ -336,14 +352,25 @@ class Bullet {
     this.speedX = speed;
     this.speedY = speed;
     this.angle = angle;
+    this.radius = 5;
+    this.bulletTouchGround;
   }
 
   physics() {
+
+    // Bullet interation with terrain
+    for (let i=0; i<rectHeights.length; i++) {
+      this.bulletTouchGround = collidePointRect(this.x, this.y, rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
+
+      if (this.bulletTouchGround) {
+        removeBullet = true;
+      }
+    }
   }
 
   update() {
 
-    // Bullet physics
+    // Bullet movement
     this.speedY -= 0.07;
     this.x += cos(this.angle) * this.speedX;
     this.y += sin(this.angle) * this.speedY;
@@ -354,6 +381,6 @@ class Bullet {
     // Show bullet
     rectMode(CENTER);
     fill(255);
-    circle(this.x, this.y, 5);
+    circle(this.x, this.y, this.radius);
   }
 }
