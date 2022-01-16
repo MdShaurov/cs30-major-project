@@ -5,7 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-let shellshockLogoImg;
+let shellshockLogoImg, tankImg;
 let leftTank, rightTank, bullet;
 let turn, leftTurn, rightTurn;
 let rectHeights = [];
@@ -26,6 +26,7 @@ let lastSwitchStart = 0;
 
 function preload() {
   shellshockLogoImg = loadImage("assets/shellshock-logo.png");
+  tankImg = loadImage("assets/tank.png");
 }
 
 function setup() {
@@ -34,8 +35,6 @@ function setup() {
   numberOfRects = width;
   generateTerrain();
 
-  leftTank = new Tank(100, 100);
-  rightTank = new Tank(width-100, 100);
 
   turn = random(0, 100);
   if (turn > 50) {
@@ -46,6 +45,9 @@ function setup() {
     leftTurn = true;
     rightTurn = false;
   }
+
+  leftTank = new Tank(100, 100, leftTurn);
+  rightTank = new Tank(width-100, 100, rightTurn);
 }
 
 function draw() {
@@ -144,8 +146,6 @@ function main() {
 
 function interfaceScreens() {
 
-  
-
   // Game logo
   if (startScreen || userInfo) {
     imageMode(CENTER);
@@ -232,11 +232,12 @@ function generateTerrain() {
 }
 
 class Tank {
-  constructor(x, y) {
+  constructor(x, y, tankTurn) {
     this.x = x;
     this.y = y;
-    this.width = 20;
-    this.height = 20;
+    this.tankTurn = tankTurn;
+    this.width = 50;
+    this.height = 30;
     this.bulletArray = [];
     this.bulletSpeed = 53;
     this.health = 100;
@@ -252,23 +253,27 @@ class Tank {
       rect(this.x, this.y - this.height*1.5, this.health/2, 10);
 
       // Show bullet power representation
-      rectMode(CENTER);
-      fill(255, 255, 0, 30);
-      circle(this.x, this.y, 150);
-      fill(255, 255, 0, 60);
-      circle(this.x, this.y, (this.bulletSpeed - 3)*1.5);
+      if (this.tankTurn) {
+        rectMode(CENTER);
+        fill(255, 255, 0, 30);
+        circle(this.x, this.y, 150);
+        fill(255, 255, 0, 60);
+        circle(this.x, this.y, (this.bulletSpeed - 3)*1.5);
+      }
 
       // Show tank
       for (let i=0; i<rectHeights.length; i++) {
         if (i === this.x) {
           angleMode(DEGREES);
           if (this.y + this.y/2 < rectHeights[i+10]) {
-            this.angleToTerrain = atan2(height - rectHeights[i+3] - this.y, rectWidth*(i+10) - this.x);
+            this.angleToTerrain = atan2(height - rectHeights[i+10] - this.y, rectWidth*(i+10) - this.x) - 110;
+            console.log("<<<");
             console.log(this.angleToTerrain);
             break;
           }
           else if (this.y + this.y/2 > rectHeights[i+10]) {
-            this.angleToTerrain = atan2(height - rectHeights[i-10] - this.y, rectWidth*(i-10) - this.x);
+            this.angleToTerrain = atan2(height - rectHeights[i-10] - this.y, rectWidth*(i-10) - this.x) - 130;
+            console.log(">>>");
             console.log(this.angleToTerrain);
             break;
           }
@@ -285,7 +290,7 @@ class Tank {
       translate(this.x, this.y);
       rotate(this.angleToTerrain);
       fill("red");
-      rect(0, 0, this.width, this.height);
+      image(tankImg, 0, 0, this.width, this.height);
       pop();
     }
   }
@@ -315,9 +320,11 @@ class Tank {
     // Tank interaction with terrain
     for (let i=0; i<rectHeights.length; i++) {
       this.tankTouchGround = collidePointRect(this.x, this.y + this.height/2 + 1, rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
+
       if (this.tankTouchGround) {
         break;
       }
+
       while (!this.tankTouchGround) {
         this.y += 1;
         if (this.y >= height - rectHeights[i] - this.height/2) {
