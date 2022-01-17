@@ -47,8 +47,8 @@ function setup() {
     rightTurn = false;
   }
 
-  leftTank = new Tank(100, 100, 0);
-  rightTank = new Tank(width-100, 100, 1);
+  leftTank = new Tank(800, 100, 0);
+  rightTank = new Tank(width-800, 100, 1);
 }
 
 function draw() {
@@ -59,7 +59,6 @@ function draw() {
   interfaceScreens();
   playerInteractions();
 
-
   leftTank.physics();
   leftTank.update();
   leftTank.display();
@@ -67,6 +66,7 @@ function draw() {
   rightTank.physics();
   rightTank.update();
   rightTank.display();
+
 }
 
 function keyPressed() {
@@ -106,14 +106,18 @@ function mousePressed() {
   if (leftTurn && mouseIsPressed && gameOn) {
     rectMode(CENTER);
     leftTank.shootBullet(leftTank.x, leftTank.y);
-    leftTurn = false;
-    rightTurn = true;
+    if (leftTank.bulletArray.length < 1) {
+      leftTurn = false;
+      rightTurn = true;
+    }
   }
   else if (rightTurn && mouseIsPressed && gameOn) {
     rectMode(CENTER);
     rightTank.shootBullet(rightTank.x, rightTank.y);
-    leftTurn = true;
-    rightTurn = false;
+    if (rightTank.bulletArray.length < 1) {
+      leftTurn = true;
+      rightTurn = false;
+    }
   }
 }
 
@@ -214,19 +218,36 @@ function playerInteractions() {
 
   // Show bullet power representation
   if(gameOn) {
-    if (leftTurn && !rightTurn) {
+    if (leftTurn && !rightTurn && !leftTank.isDead()) {
       rectMode(CENTER);
       fill(255, 255, 0, 30);
       circle(leftTank.x, leftTank.y, 150);
       fill(255, 255, 0, 60);
       circle(leftTank.x, leftTank.y, (leftTank.bulletSpeed - 3)*1.5);
     }
-    else if (rightTurn && !leftTurn) {
+    else if (rightTurn && !leftTurn && !rightTank.isDead()) {
       rectMode(CENTER);
       fill(255, 255, 0, 30);
       circle(rightTank.x, rightTank.y, 150);
       fill(255, 255, 0, 60);
       circle(rightTank.x, rightTank.y, (rightTank.bulletSpeed - 3)*1.5);
+    }
+
+    if (leftTank.bulletArray.length > 0) {
+      console.log(leftTank.bulletArray);
+      if (leftTank.bulletArray[0].x > rightTank.x - rightTank.width/2 && leftTank.bulletArray[0].x < rightTank.x + rightTank.width/2 && leftTank.bulletArray[0].y > rightTank.y - rightTank.height/2 && leftTank.bulletArray[0].y < rightTank.y + rightTank.height/2) {
+        removeBullet = true;
+        rightTank.health -= 20;
+        console.log(rightTank.health);
+      }
+    }
+    if (rightTank.bulletArray.length > 0) {
+      console.log(rightTank.bulletArray);
+      if (rightTank.bulletArray[0].x > leftTank.x - leftTank.width/2 && rightTank.bulletArray[0].x < leftTank.x + leftTank.width/2 && rightTank.bulletArray[0].y > leftTank.y - leftTank.height/2 && rightTank.bulletArray[0].y < leftTank.y + leftTank.height/2) {
+        removeBullet = true;
+        leftTank.health -= 20;
+        console.log(leftTank.health);
+      }
     }
   }
 }
@@ -264,7 +285,7 @@ class Tank {
     this.bulletArray = [];
     this.bulletSpeed = 53;
     this.health = 100;
-    this.angleToTerrain, this.angleToMouse, this.tankTouchGround;
+    this.angleToTerrain, this.angleToMouse, this.tankTouchGround, this.removeBullet;
   }
 
   display() {
@@ -279,15 +300,14 @@ class Tank {
         }
       }
 
-      push();
       // Show health points
+      push();
       rectMode(CENTER);
       fill("green");
-      translate(this.x, this.y - this.height*1.5);
-      rotate(this.angleToTerrain);
-      rect(0, 0, this.health/2, 10);
+      rect(this.x, this.y - this.height*1.5, this.health/2, 10);
       pop();
       
+      // Show tank
       push();
       rectMode(CENTER);
       translate(this.x, this.y);
@@ -313,6 +333,10 @@ class Tank {
       if (removeBullet) {
         this.removeBullet = true;
       }
+
+      // if (this.bulletArray[bullet].x > this.x - this.width/2 && this.bulletArray[bullet].x < this.x + this.width/2 && this.bulletArray[bullet].y > this.y - this.height/2 && this.bulletArray[bullet].y < this.y + this.height/2) {
+        
+      // }
 
       if (this.bulletArray.length >= 2 || this.removeBullet || bullet.x < 0 || bullet.x > width) {
         this.bulletArray.shift();
