@@ -6,6 +6,7 @@
 // - describe what you did to take this project "above and beyond"
 
 let shellshockLogoImg, blueTankImg, redTankImg;
+let shotSfx;
 let leftTank, rightTank, bullet;
 let turn, leftTurn, rightTurn;
 let rectHeights = [];
@@ -25,9 +26,10 @@ let rightTankReady= false;
 let lastSwitchStart = 0;
 
 function preload() {
-  shellshockLogoImg = loadImage("assets/shellshock-logo.png");
-  blueTankImg = loadImage("assets/blueTank.png");
-  redTankImg = loadImage("assets/redTank.png");
+  shellshockLogoImg = loadImage("assets/menu/shellshock-logo.png");
+  blueTankImg = loadImage("assets/tank/blueTank.png");
+  redTankImg = loadImage("assets/tank/redTank.png");
+  shotSfx = loadSound("assets/sound/shotSfx.mp3");
 }
 
 function setup() {
@@ -47,8 +49,8 @@ function setup() {
     rightTurn = false;
   }
 
-  leftTank = new Tank(800, 100, 0);
-  rightTank = new Tank(width-800, 100, 1);
+  leftTank = new Tank(400, 100, 0);
+  rightTank = new Tank(width-400, 100, 1);
 }
 
 function draw() {
@@ -103,20 +105,22 @@ function keyPressed() {
 function mousePressed() {
 
   // Shoots bullet
-  if (leftTurn && mouseIsPressed && gameOn) {
-    rectMode(CENTER);
-    leftTank.shootBullet(leftTank.x, leftTank.y);
-    if (leftTank.bulletArray.length < 1) {
+  if (gameOn) {
+    if (leftTurn && mouseIsPressed && !leftTank.isDead()) {
+      rectMode(CENTER);
+      leftTank.shootBullet(leftTank.x, leftTank.y - leftTank.height*0.7);
+      shotSfx.play();
+
       leftTurn = false;
       rightTurn = true;
     }
-  }
-  else if (rightTurn && mouseIsPressed && gameOn) {
-    rectMode(CENTER);
-    rightTank.shootBullet(rightTank.x, rightTank.y);
-    if (rightTank.bulletArray.length < 1) {
-      leftTurn = true;
+    else if (rightTurn && mouseIsPressed && !rightTank.isDead()) {
+      rectMode(CENTER);
+      rightTank.shootBullet(rightTank.x, rightTank.y - rightTank.height*0.7);
+      shotSfx.play();
+
       rightTurn = false;
+      leftTurn = true;
     }
   }
 }
@@ -160,9 +164,13 @@ function interfaceScreens() {
   if (startScreen && !userInfo) {
 
     // Prompt to start
+
     textSize(20);
     textAlign(CENTER);
-    text("Press ENTER to start!", width/2, height/2);
+    if (frameCount % 120 < 60) {
+      fill(255, 255, 255, alpha);
+      text("Press ENTER to start!", width/2, height/2);
+    }
   }
   else if (!startScreen && userInfo) {
 
@@ -234,19 +242,15 @@ function playerInteractions() {
     }
 
     if (leftTank.bulletArray.length > 0) {
-      console.log(leftTank.bulletArray);
       if (leftTank.bulletArray[0].x > rightTank.x - rightTank.width/2 && leftTank.bulletArray[0].x < rightTank.x + rightTank.width/2 && leftTank.bulletArray[0].y > rightTank.y - rightTank.height/2 && leftTank.bulletArray[0].y < rightTank.y + rightTank.height/2) {
         removeBullet = true;
         rightTank.health -= 20;
-        console.log(rightTank.health);
       }
     }
     if (rightTank.bulletArray.length > 0) {
-      console.log(rightTank.bulletArray);
       if (rightTank.bulletArray[0].x > leftTank.x - leftTank.width/2 && rightTank.bulletArray[0].x < leftTank.x + leftTank.width/2 && rightTank.bulletArray[0].y > leftTank.y - leftTank.height/2 && rightTank.bulletArray[0].y < leftTank.y + leftTank.height/2) {
         removeBullet = true;
         leftTank.health -= 20;
-        console.log(leftTank.health);
       }
     }
   }
@@ -302,9 +306,11 @@ class Tank {
 
       // Show health points
       push();
-      rectMode(CENTER);
-      fill("green");
-      rect(this.x, this.y - this.height*1.5, this.health/2, 10);
+      if (gameOn) {
+        rectMode(CENTER);
+        fill("green");
+        rect(this.x, this.y - this.height*1.5, this.health/2, 10);
+      }
       pop();
       
       // Show tank
@@ -409,9 +415,15 @@ class Bullet {
   update() {
 
     // Bullet movement
-    this.speedY -= 0.07;
+    console.log(this.angle);
     this.x += cos(this.angle) * this.speedX;
     this.y += sin(this.angle) * this.speedY;
+    if (this.angle > 0) {
+      this.speedY += 0.07;
+    }
+    else {
+      this.speedY -= 0.07;
+    }
   }
 
   display() {
