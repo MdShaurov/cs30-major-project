@@ -5,7 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-let shellshockLogoImg, tankImg;
+let shellshockLogoImg, blueTankImg, redTankImg;
 let leftTank, rightTank, bullet;
 let turn, leftTurn, rightTurn;
 let rectHeights = [];
@@ -26,7 +26,8 @@ let lastSwitchStart = 0;
 
 function preload() {
   shellshockLogoImg = loadImage("assets/shellshock-logo.png");
-  tankImg = loadImage("assets/tank.png");
+  blueTankImg = loadImage("assets/blueTank.png");
+  redTankImg = loadImage("assets/redTank.png");
 }
 
 function setup() {
@@ -46,8 +47,8 @@ function setup() {
     rightTurn = false;
   }
 
-  leftTank = new Tank(100, 100, leftTurn);
-  rightTank = new Tank(width-100, 100, rightTurn);
+  leftTank = new Tank(100, 100, 0);
+  rightTank = new Tank(width-100, 100, 1);
 }
 
 function draw() {
@@ -56,15 +57,16 @@ function draw() {
   keyPressed();
 
   interfaceScreens();
+  playerInteractions();
 
 
   leftTank.physics();
   leftTank.update();
   leftTank.display();
 
-  // rightTank.physics();
-  // rightTank.update();
-  // rightTank.display();
+  rightTank.physics();
+  rightTank.update();
+  rightTank.display();
 }
 
 function keyPressed() {
@@ -208,6 +210,27 @@ function rightInput() {
   rightTankReady = true;
 }
 
+function playerInteractions() {
+
+  // Show bullet power representation
+  if(gameOn) {
+    if (leftTurn && !rightTurn) {
+      rectMode(CENTER);
+      fill(255, 255, 0, 30);
+      circle(leftTank.x, leftTank.y, 150);
+      fill(255, 255, 0, 60);
+      circle(leftTank.x, leftTank.y, (leftTank.bulletSpeed - 3)*1.5);
+    }
+    else if (rightTurn && !leftTurn) {
+      rectMode(CENTER);
+      fill(255, 255, 0, 30);
+      circle(rightTank.x, rightTank.y, 150);
+      fill(255, 255, 0, 60);
+      circle(rightTank.x, rightTank.y, (rightTank.bulletSpeed - 3)*1.5);
+    }
+  }
+}
+
 function displayTerrain() {
 
   // Show terrain
@@ -232,12 +255,12 @@ function generateTerrain() {
 }
 
 class Tank {
-  constructor(x, y, tankTurn) {
+  constructor(x, y, color) {
     this.x = x;
     this.y = y;
-    this.tankTurn = tankTurn;
     this.width = 50;
     this.height = 30;
+    this.theColor = color;
     this.bulletArray = [];
     this.bulletSpeed = 53;
     this.health = 100;
@@ -247,50 +270,34 @@ class Tank {
   display() {
     if (!this.isDead()) {
 
-      // Show health points
-      rectMode(CENTER);
-      fill("green");
-      rect(this.x, this.y - this.height*1.5, this.health/2, 10);
-
-      // Show bullet power representation
-      if (this.tankTurn) {
-        rectMode(CENTER);
-        fill(255, 255, 0, 30);
-        circle(this.x, this.y, 150);
-        fill(255, 255, 0, 60);
-        circle(this.x, this.y, (this.bulletSpeed - 3)*1.5);
-      }
-
       // Show tank
       for (let i=0; i<rectHeights.length; i++) {
         if (i === this.x) {
           angleMode(DEGREES);
-          if (this.y + this.y/2 < rectHeights[i+10]) {
-            this.angleToTerrain = atan2(height - rectHeights[i+10] - this.y, rectWidth*(i+10) - this.x) - 110;
-            console.log("<<<");
-            console.log(this.angleToTerrain);
-            break;
-          }
-          else if (this.y + this.y/2 > rectHeights[i+10]) {
-            this.angleToTerrain = atan2(height - rectHeights[i-10] - this.y, rectWidth*(i-10) - this.x) - 130;
-            console.log(">>>");
-            console.log(this.angleToTerrain);
-            break;
-          }
-          else {
-            this.angleToTerrain = 90;
-            console.log(this.angleToTerrain);
-            break;
-          }
+          this.angleToTerrain = atan2(height - rectHeights[i+4] - (this.y + this.height/2), rectWidth*(i+4) - this.x);
+          break;
         }
       }
 
       push();
+      // Show health points
+      rectMode(CENTER);
+      fill("green");
+      translate(this.x, this.y - this.height*1.5);
+      rotate(this.angleToTerrain);
+      rect(0, 0, this.health/2, 10);
+      pop();
+      
+      push();
       rectMode(CENTER);
       translate(this.x, this.y);
       rotate(this.angleToTerrain);
-      fill("red");
-      image(tankImg, 0, 0, this.width, this.height);
+      if (this.theColor === 0) {
+        image(blueTankImg, 0, 0, this.width, this.height);
+      }
+      else {
+        image(redTankImg, 0, 0, this.width, this.height);
+      }
       pop();
     }
   }
