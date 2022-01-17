@@ -11,12 +11,13 @@ let leftTank, rightTank, bullet;
 let turn, leftTurn, rightTurn;
 let rectHeights = [];
 let numberOfRects;
-let gameOn;
+let gameOn, gameOver;
 let removeBullet;
 let userInfo, rectWidth;
 let startScreen = true;
 let leftTextBox, rightTextBox, leftInputButton, rightInputButton, startElements;
-let leftTankName, rightTankName;
+let leftTankName = "";
+let rightTankName = "";
 let leftButtonCreate = true;
 let rightButtonCreate = true;
 let leftTextCreate = true;
@@ -63,11 +64,11 @@ function draw() {
 
   leftTank.physics();
   leftTank.update();
-  leftTank.display();
+  leftTank.display(leftTankName);
 
   rightTank.physics();
   rightTank.update();
-  rightTank.display();
+  rightTank.display(rightTankName);
 
 }
 
@@ -157,11 +158,11 @@ function main() {
 function interfaceScreens() {
 
   // Game logo
-  if (startScreen || userInfo) {
+  if (startScreen || userInfo && !gameOn && !gameOver) {
     imageMode(CENTER);
     image(shellshockLogoImg, width/2, height/5);
   }
-  if (startScreen && !userInfo) {
+  if (startScreen && !userInfo && !gameOn && !gameOver) {
 
     // Prompt to start
 
@@ -172,7 +173,7 @@ function interfaceScreens() {
       text("Press ENTER to start!", width/2, height/2);
     }
   }
-  else if (!startScreen && userInfo) {
+  else if (!startScreen && userInfo && !gameOn && !gameOver) {
 
     // Name input prompt
     textSize(24);
@@ -181,7 +182,7 @@ function interfaceScreens() {
 
     if (leftTextCreate && rightTextCreate && leftButtonCreate && rightButtonCreate) {
       // Text box & button for name of left tank input
-      leftTextBox = createInput("Name");
+      leftTextBox = createInput("");
       leftTextBox.size(150, 20);
       leftTextBox.position(width/4 - leftTextBox.width/2, height/2 - leftTextBox.height);
       leftTextCreate = false;
@@ -192,7 +193,7 @@ function interfaceScreens() {
       leftButtonCreate = false;
 
       // Text box & button for name of right tank input
-      rightTextBox = createInput("Name");
+      rightTextBox = createInput("");
       rightTextBox.size(150, 20);
       rightTextBox.position(width*0.75 - rightTextBox.width/2, height/2 - rightTextBox.height);
       rightTextCreate = false;
@@ -207,6 +208,7 @@ function interfaceScreens() {
   if (leftTankReady === true && rightTankReady === true) {
     userInfo = false;
     gameOn = true;
+    gameOver = false;
     leftTextBox.remove();
     leftInputButton.remove();
     rightTextBox.remove();
@@ -215,10 +217,32 @@ function interfaceScreens() {
 }
 
 function leftInput() {
-  leftTankReady = true;
+  leftTankName = leftTextBox.value();
+  if (leftTankName.length < 1) {
+    let temp = frameCount() + 180;
+    while (frameCount() < temp) {
+      textSize(24);
+      textAlign(CENTER);
+      text("Name is too short!", width/4, height*0.60);
+      text("Must be at least 1 character!", width/4, height*0.75);
+    }
+  } 
+  else if (leftTankName.length > 15) {
+    let temp = frameCount() + 180;
+    while (frameCount() < temp) {
+      textSize(24);
+      textAlign(CENTER);
+      text("Name is too long!", width/4, height*0.60);
+      text("Must be less than 15 characters long!", width/4, height*0.75);
+    }
+  }
+  else {
+    leftTankReady = true;
+  }
 }
 
 function rightInput() {
+  rightTankName = rightTextBox.value();
   rightTankReady = true;
 }
 
@@ -292,7 +316,7 @@ class Tank {
     this.angleToTerrain, this.angleToMouse, this.tankTouchGround, this.removeBullet;
   }
 
-  display() {
+  display(name) {
     if (!this.isDead()) {
 
       // Show tank
@@ -308,10 +332,18 @@ class Tank {
       push();
       if (gameOn) {
         rectMode(CENTER);
+        fill(255);
+        textSize(24);
+        textAlign(CENTER);
+        text(name, this.x, this.y - this.height*2);
         fill("green");
         rect(this.x, this.y - this.height*1.5, this.health/2, 10);
       }
       pop();
+
+      push();
+      rect(this.x, this.y, 10, 5);
+      pop()
       
       // Show tank
       push();
