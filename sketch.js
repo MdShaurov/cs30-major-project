@@ -5,7 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-let shellshockLogoImg, blueTankImg, redTankImg;
+let shellshockLogoImg, blueTankImg, redTankImg, backgroundImg;
 let shotSfx;
 let leftTank, rightTank, bullet;
 let turn, leftTurn, rightTurn;
@@ -30,6 +30,7 @@ function preload() {
   shellshockLogoImg = loadImage("assets/menu/shellshock-logo.png");
   blueTankImg = loadImage("assets/tank/blueTank.png");
   redTankImg = loadImage("assets/tank/redTank.png");
+  backgroundImg = loadImage("assets/background/background.jpg");
   shotSfx = loadSound("assets/sound/shotSfx.mp3");
 }
 
@@ -151,10 +152,6 @@ function mouseWheel(event) {
   }
 }
 
-function main() {
-
-}
-
 function interfaceScreens() {
 
   // Game logo
@@ -218,27 +215,28 @@ function interfaceScreens() {
 
 function leftInput() {
   leftTankName = leftTextBox.value();
-  if (leftTankName.length < 1) {
-    let temp = frameCount() + 180;
-    while (frameCount() < temp) {
-      textSize(24);
-      textAlign(CENTER);
-      text("Name is too short!", width/4, height*0.60);
-      text("Must be at least 1 character!", width/4, height*0.75);
-    }
-  } 
-  else if (leftTankName.length > 15) {
-    let temp = frameCount() + 180;
-    while (frameCount() < temp) {
-      textSize(24);
-      textAlign(CENTER);
-      text("Name is too long!", width/4, height*0.60);
-      text("Must be less than 15 characters long!", width/4, height*0.75);
-    }
-  }
-  else {
-    leftTankReady = true;
-  }
+  // if (leftTankName.length < 1) {
+  //   let temp = frameCount + 180;
+  //   while (frameCount < temp) {
+  //     textSize(24);
+  //     textAlign(CENTER);
+  //     text("Name is too short!", width/4, height*0.60);
+  //     text("Must be at least 1 character!", width/4, height*0.75);
+  //   }
+  // } 
+  // else if (leftTankName.length > 15) {
+  //   let temp = frameCount + 180;
+  //   while (frameCount < temp) {
+  //     textSize(24);
+  //     textAlign(CENTER);
+  //     text("Name is too long!", width/4, height*0.60);
+  //     text("Must be less than 15 characters long!", width/4, height*0.75);
+  //   }
+  // }
+  // else {
+  //   leftTankReady = true;
+  // }
+  leftTankReady = true;
 }
 
 function rightInput() {
@@ -248,21 +246,46 @@ function rightInput() {
 
 function playerInteractions() {
 
+  // push();
+  // let angleToMouse = atan2(mouseY - leftTank.y, mouseX - leftTank.x);
+
+  // fill("blue");
+  // translate(leftTank.x, rightTank.y)
+  // rotate(angleToMouse);
+  // rect(0, 0, 20, 5);
+  // pop()
+
   // Show bullet power representation
   if(gameOn) {
     if (leftTurn && !rightTurn && !leftTank.isDead()) {
+      push();
       rectMode(CENTER);
+      noStroke();
       fill(255, 255, 0, 30);
-      circle(leftTank.x, leftTank.y, 150);
+      ellipse(leftTank.x, leftTank.y, 500, 500);
+
+      let angleToMouse = atan2(mouseY - leftTank.y, mouseX - leftTank.x);
+
       fill(255, 255, 0, 60);
-      circle(leftTank.x, leftTank.y, (leftTank.bulletSpeed - 3)*1.5);
+      translate(leftTank.x, leftTank.y);
+      rotate(angleToMouse);
+      arc(0, 0, (leftTank.bulletSpeed - 3)*5, 500, 0, PI*2.5);
+      pop();
     }
     else if (rightTurn && !leftTurn && !rightTank.isDead()) {
+      push();
       rectMode(CENTER);
-      fill(255, 255, 0, 30);
-      circle(rightTank.x, rightTank.y, 150);
-      fill(255, 255, 0, 60);
-      circle(rightTank.x, rightTank.y, (rightTank.bulletSpeed - 3)*1.5);
+      noStroke();
+      fill(255, 255, 0, 25);
+      ellipse(rightTank.x, rightTank.y, 500, 500);
+
+      let angleToMouse = atan2(mouseY - rightTank.y, mouseX - rightTank.x);
+
+      fill(255, 255, 0, 50);
+      translate(rightTank.x, rightTank.y);
+      rotate(angleToMouse);
+      arc(0, 0, (rightTank.bulletSpeed - 3)*5, 500, 0, PI*2.5);
+      pop();
     }
 
     if (leftTank.bulletArray.length > 0) {
@@ -281,6 +304,7 @@ function playerInteractions() {
 }
 
 function displayTerrain() {
+  // backgroundImg.size(width, height);
 
   // Show terrain
   rectWidth = width/rectHeights.length;
@@ -329,21 +353,19 @@ class Tank {
       }
 
       // Show health points
-      push();
       if (gameOn) {
+        push();
         rectMode(CENTER);
-        fill(255);
         textSize(24);
         textAlign(CENTER);
+        fill(255);
         text(name, this.x, this.y - this.height*2);
-        fill("green");
-        rect(this.x, this.y - this.height*1.5, this.health/2, 10);
-      }
-      pop();
 
-      push();
-      rect(this.x, this.y, 10, 5);
-      pop()
+        fill("green");
+        translate(this.x, this.y - this.height*1.5);
+        rect(0, 0, this.health/2, 10);
+        pop();
+      }
       
       // Show tank
       push();
