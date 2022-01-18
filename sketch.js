@@ -12,6 +12,7 @@ let turn, leftTurn, rightTurn;
 let rectHeights = [];
 let numberOfRects;
 let gameOn, gameOver;
+let timer, timeSet, setTimer, seconds, minutes;
 let removeBullet;
 let userInfo, rectWidth;
 let startScreen = true;
@@ -36,10 +37,11 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  backgroundImg.resize(width, height);
+  frameRate(60);
 
   numberOfRects = width;
   generateTerrain();
-
 
   turn = random(0, 100);
   if (turn > 50) {
@@ -53,10 +55,15 @@ function setup() {
 
   leftTank = new Tank(400, 100, 0);
   rightTank = new Tank(width-400, 100, 1);
+
+  timer = 5;
+  setTimer = true;
+  minutes = 5;
+  seconds = 60;
 }
 
 function draw() {
-  background(0);
+  image(backgroundImg, width/2, height/2);
   displayTerrain();
   keyPressed();
 
@@ -71,12 +78,15 @@ function draw() {
   rightTank.update();
   rightTank.display(rightTankName);
 
+  time();
 }
 
 function keyPressed() {
-  if (keyIsDown(13)) {
-    startScreen = false;
-    userInfo = true;
+  if(startScreen) {
+    if (keyIsDown(13)) {
+      startScreen = false;
+      userInfo = true;
+    }
   }
   if (gameOn && leftTurn) {
     if (keyIsDown(68)) {
@@ -148,6 +158,40 @@ function mouseWheel(event) {
       else if (rightTank.bulletSpeed >= 104) {
         rightTank.bulletSpeed = 103;
       }
+    }
+  }
+}
+
+function time() {
+  if (setTimer === 5) {
+    if (timeSet) {
+      timer = 18000;
+      timeSet = false;
+    }
+  }
+
+  textAlign(CENTER);
+  textSize(24);
+  if (seconds < 10) {
+    text(minutes + " : 0" + seconds, width/2, height/8);
+  }
+  else if (seconds > 59) {
+    text(minutes + " : 00", width/2, height/8);
+  }
+  else {
+    text(minutes + " : " + seconds, width/2, height/8);
+  }
+
+  if (timer !== 0) {
+    if (frameCount % 60 === 0) {
+      timer -= 60;
+      seconds--;
+      if (seconds < 0) {
+        seconds = 60;
+      }
+    }
+    if (seconds === 59) {
+      minutes--;
     }
   }
 }
@@ -268,7 +312,7 @@ function playerInteractions() {
 
       fill(255, 255, 0, 60);
       translate(leftTank.x, leftTank.y);
-      rotate(angleToMouse);
+      rotate(angleToMouse - PI*2.5/2);
       arc(0, 0, (leftTank.bulletSpeed - 3)*5, 500, 0, PI*2.5);
       pop();
     }
@@ -283,7 +327,7 @@ function playerInteractions() {
 
       fill(255, 255, 0, 50);
       translate(rightTank.x, rightTank.y);
-      rotate(angleToMouse);
+      rotate(angleToMouse - PI*2.5/2);
       arc(0, 0, (rightTank.bulletSpeed - 3)*5, 500, 0, PI*2.5);
       pop();
     }
