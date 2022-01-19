@@ -31,7 +31,7 @@ function preload() {
   redTankImg = loadImage("assets/image/tank/red-tank.png");
   backgroundImg = loadImage("assets/image/background/background.jpg");
   startMusic = createAudio("assets/sound/music/start-music.mp3");
-  gameMusic = createAudio("assets/sound/music/game-music.ogg")
+  gameMusic = createAudio("assets/sound/music/game-music.ogg");
   moveSfx = createAudio("assets/sound/tank/tank-engine-sfx.mp3");
   shotSfx = createAudio("assets/sound/tank/shot-sfx.ogg");
   tankHitSfx = createAudio("assets/sound/tank/tank-hit-sfx.ogg");
@@ -251,7 +251,7 @@ function time() {
   if (setTimer === 5) {
     if (timeSet) {
       timer = 18000;
-      minutes = 5
+      minutes = 5;
       seconds = 60;
       timeSet = false;
     }
@@ -473,18 +473,18 @@ function playerInteractions() {
 
     if (leftTank.bulletArray.length > 0) {
       if (leftTank.bulletArray[0].x > rightTank.x - rightTank.width/2 && leftTank.bulletArray[0].x < rightTank.x + rightTank.width/2 && leftTank.bulletArray[0].y > rightTank.y - rightTank.height/2 && leftTank.bulletArray[0].y < rightTank.y + rightTank.height/2) {
+        tankHitSfx.play();
+        
         removeBullet = true;
         rightTank.health -= 20;
-
-        tankHitSfx.play();
       }
     }
     if (rightTank.bulletArray.length > 0) {
       if (rightTank.bulletArray[0].x > leftTank.x - leftTank.width/2 && rightTank.bulletArray[0].x < leftTank.x + leftTank.width/2 && rightTank.bulletArray[0].y > leftTank.y - leftTank.height/2 && rightTank.bulletArray[0].y < leftTank.y + leftTank.height/2) {
+        tankHitSfx.play();
+        
         removeBullet = true;
         leftTank.health -= 20;
-
-        tankHitSfx.play();
       }
     }
   }
@@ -591,11 +591,11 @@ class Tank {
       // }
 
       if (this.removeBullet) {
+        groundHitSfx.play();
+
         this.bulletArray.shift();
         removeBullet = false;
         this.removeBullet = false;
-
-        groundHitSfx.play();
       }
 
       if (this.bulletArray.length > 1 || bullet.x < 0 || bullet.x > width) {
