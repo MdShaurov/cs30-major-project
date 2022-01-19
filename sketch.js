@@ -5,34 +5,37 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
+// Global variables
 let shellshockLogoImg, blueTankImg, redTankImg, backgroundImg;
-let shotSfx;
+let startMusic, gameMusic;
+let startMusicOn, gameMusicOn;
+let shotSfx, moveSfx, groundHitSfx, tankHitSfx;
 let leftTank, rightTank, bullet;
 let turn, leftTurn, rightTurn;
-let rectHeights = [];
+let rectHeights;
 let numberOfRects;
 let gameOn, gameOver;
 let timer, timeSet, setTimer, seconds, minutes;
 let removeBullet;
-let userInfo, rectWidth;
-let startScreen = true;
+let userInfo, startScreen;
+let rectWidth;
 let leftTextBox, rightTextBox, leftInputButton, rightInputButton, startElements;
-let leftTankName = "";
-let rightTankName = "";
-let leftButtonCreate = true;
-let rightButtonCreate = true;
-let leftTextCreate = true;
-let rightTextCreate = true;
-let leftTankReady = false;
-let rightTankReady= false;
-let lastSwitchStart = 0;
+let leftTankName, rightTankName;
+let leftButtonCreate, rightButtonCreate;
+let leftTextCreate, rightTextCreate;
+let leftTankReady, rightTankReady;
 
 function preload() {
-  shellshockLogoImg = loadImage("assets/menu/shellshock-logo.png");
-  blueTankImg = loadImage("assets/tank/blueTank.png");
-  redTankImg = loadImage("assets/tank/redTank.png");
-  backgroundImg = loadImage("assets/background/background.jpg");
-  shotSfx = loadSound("assets/sound/shotSfx.mp3");
+  shellshockLogoImg = loadImage("assets/image/menu/shellshock-logo.png");
+  blueTankImg = loadImage("assets/image/tank/blue-tank.png");
+  redTankImg = loadImage("assets/image/tank/red-tank.png");
+  backgroundImg = loadImage("assets/image/background/background.jpg");
+  startMusic = createAudio("assets/sound/music/start-music.mp3");
+  gameMusic = createAudio("assets/sound/music/game-music.ogg")
+  moveSfx = createAudio("assets/sound/tank/tank-engine-sfx.mp3");
+  shotSfx = createAudio("assets/sound/tank/shot-sfx.ogg");
+  tankHitSfx = createAudio("assets/sound/tank/tank-hit-sfx.ogg");
+  groundHitSfx = createAudio("assets/sound/tank/ground-hit-sfx.ogg");
 }
 
 function setup() {
@@ -40,6 +43,22 @@ function setup() {
   backgroundImg.resize(width, height);
   frameRate(60);
 
+  startScreen = true;
+  startMusicOn = true;
+
+  leftButtonCreate = true;
+  rightButtonCreate = true;
+
+  leftTextCreate = true;
+  rightTextCreate = true;
+
+  leftTankName = "";
+  rightTankName = "";
+
+  leftTankReady = false;
+  rightTankReady = false;
+
+  rectHeights = [];
   numberOfRects = width;
   generateTerrain();
 
@@ -47,23 +66,20 @@ function setup() {
   if (turn > 50) {
     rightTurn = true;
     leftTurn = false;
+    turn = true;
   }
   else {
     leftTurn = true;
     rightTurn = false;
+    turn = true;
   }
 
   leftTank = new Tank(400, 100, 0);
   rightTank = new Tank(width-400, 100, 1);
-
-  timer = 5;
-  setTimer = true;
-  minutes = 5;
-  seconds = 60;
 }
 
 function draw() {
-  image(backgroundImg, width/2, height/2);
+  background(0);
   displayTerrain();
   keyPressed();
 
@@ -78,7 +94,7 @@ function draw() {
   rightTank.update();
   rightTank.display(rightTankName);
 
-  time();
+  // switchAfterWhile();
 }
 
 function keyPressed() {
@@ -91,25 +107,63 @@ function keyPressed() {
   if (gameOn && leftTurn) {
     if (keyIsDown(68)) {
       if (leftTank.x >= 0 + leftTank.width/2 && leftTank.x < width - leftTank.width/2) {
+
+        let moveSfxOn = true;
+        if (moveSfxOn) {
+          moveSfxOn = false;
+          moveSfx.volume(0.5);
+          moveSfx.play();
+        }
+
         leftTank.x++;
       }
     }
-    if (keyIsDown(65)) {
+    else if (keyIsDown(65)) {
       if (leftTank.x > 0 + leftTank.width/2 && leftTank.x <= width - leftTank.width/2) {
+
+        let moveSfxOn = true;
+        if (moveSfxOn) {
+          moveSfxOn = false;
+          moveSfx.volume(0.5);
+          moveSfx.play();
+        }
+        
         leftTank.x--;
       }
+    }
+    else {
+      moveSfx.stop();
     }
   }
   if (gameOn && rightTurn) {
     if (keyIsDown(39)) {
       if (rightTank.x >= 0 + rightTank.width/2 && rightTank.x < width - rightTank.width/2) {
+
+        let moveSfxOn = true;
+        if (moveSfxOn) {
+          moveSfxOn = false;
+          moveSfx.volume(0.5);
+          moveSfx.play();
+        }
+
         rightTank.x++;
       }
     }
-    if (keyIsDown(37)) {
+    else if (keyIsDown(37)) {
       if (rightTank.x > 0 + rightTank.width/2 && rightTank.x <= width - rightTank.width/2) {
+
+        let moveSfxOn = true;
+        if (moveSfxOn) {
+          moveSfxOn = false;
+          moveSfx.volume(0.5);
+          moveSfx.play();
+        }
+
         rightTank.x--;
       }
+    }
+    else {
+      moveSfx.stop();
     }
   }
 }
@@ -118,21 +172,25 @@ function mousePressed() {
 
   // Shoots bullet
   if (gameOn) {
-    if (leftTurn && mouseIsPressed && !leftTank.isDead()) {
+    if (leftTurn && mouseIsPressed && !leftTank.isDead() && rightTank.bulletArray.length < 1) {
       rectMode(CENTER);
-      leftTank.shootBullet(leftTank.x, leftTank.y - leftTank.height*0.7);
+      leftTank.shootBullet(leftTank.x, leftTank.y);
       shotSfx.play();
 
       leftTurn = false;
       rightTurn = true;
+
+      turn = true;
     }
-    else if (rightTurn && mouseIsPressed && !rightTank.isDead()) {
+    else if (rightTurn && mouseIsPressed && !rightTank.isDead() && leftTank.bulletArray.length < 1) {
       rectMode(CENTER);
-      rightTank.shootBullet(rightTank.x, rightTank.y - rightTank.height*0.7);
+      rightTank.shootBullet(rightTank.x, rightTank.y);
       shotSfx.play();
 
       rightTurn = false;
       leftTurn = true;
+
+      turn = true;
     }
   }
 }
@@ -162,35 +220,91 @@ function mouseWheel(event) {
   }
 }
 
+function switchAfterWhile() {
+
+  if (leftTurn && turn) {
+    setTimeout(switchTurn(), 10000);
+    turn = false;
+  }
+  if (rightTurn && turn) {
+    setTimeout(switchTurn(), 10000);
+    turn = false;
+  }
+}
+
+function switchTurn() {
+  if (leftTurn) {
+    rightTurn = true;
+    leftTurn = false;
+    turn = true;
+  }
+  else if (rightTurn) {
+    leftTurn = true;
+    rightTurn = false;
+    turn = true;
+  }
+}
+
 function time() {
+
+  // Duration of timer
   if (setTimer === 5) {
     if (timeSet) {
       timer = 18000;
+      minutes = 5
+      seconds = 60;
+      timeSet = false;
+    }
+  }
+  else if (setTimer === 10) {
+    if (timeSet) {
+      timer = 36000;
+      minutes = 10;
+      seconds = 60;
+      timeSet = false;
+    }
+  }
+  else {
+    if (timeSet) {
+      timer = 3600;
+      minutes = 1;
+      seconds = 60;
       timeSet = false;
     }
   }
 
+  // Show timer
   textAlign(CENTER);
   textSize(24);
-  if (seconds < 10) {
-    text(minutes + " : 0" + seconds, width/2, height/8);
+  if (seconds < 10 && minutes < 10) {
+    text("0" + minutes + " : 0" + seconds, width/2, height/10);
   }
-  else if (seconds > 59) {
-    text(minutes + " : 00", width/2, height/8);
+  else if (seconds < 9 && minutes > 9) {
+    text(minutes + " : 0" + seconds, width/2, height/10);
+  }
+  else if (seconds > 59 && minutes < 10) {
+    text("0" + minutes + " : 00", width/2, height/10);
+  }
+  else if (seconds > 59 && minutes > 9) {
+    text(minutes + " : 00", width/2, height/10);
+  }
+  else if (seconds > 9 && minutes < 10) {
+    text("0" + minutes + " : " + seconds, width/2, height/10);
   }
   else {
-    text(minutes + " : " + seconds, width/2, height/8);
+    text(minutes + " : " + seconds, width/2, height/10);
   }
 
+  // Update timer
   if (timer !== 0) {
     if (frameCount % 60 === 0) {
       timer -= 60;
       seconds--;
-      if (seconds < 0) {
+      if (seconds < 1) {
         seconds = 60;
       }
     }
-    if (seconds === 59) {
+    if (seconds === 59 && frameCount % 60 === 0 && minutes !== 0) {
       minutes--;
     }
   }
@@ -198,20 +312,26 @@ function time() {
 
 function interfaceScreens() {
 
-  // Game logo
   if (startScreen || userInfo && !gameOn && !gameOver) {
+
+    // Game logo
     imageMode(CENTER);
     image(shellshockLogoImg, width/2, height/5);
   }
   if (startScreen && !userInfo && !gameOn && !gameOver) {
 
     // Prompt to start
-
     textSize(20);
     textAlign(CENTER);
     if (frameCount % 120 < 60) {
       fill(255, 255, 255, alpha);
       text("Press ENTER to start!", width/2, height/2);
+    }
+
+    if (startMusicOn) {
+      startMusic.volume(0.4);
+      startMusic.loop();
+      startMusicOn = false;
     }
   }
   else if (!startScreen && userInfo && !gameOn && !gameOver) {
@@ -247,13 +367,29 @@ function interfaceScreens() {
   }
 
   if (leftTankReady === true && rightTankReady === true) {
+
+    setTimer = 5;
+    timeSet = true;
+  
     userInfo = false;
     gameOn = true;
+    gameMusicOn = true;
     gameOver = false;
+
+    if (gameMusicOn) {
+      gameMusicOn = false;
+      startMusic.stop();
+      gameMusic.volume(0.4);
+      gameMusic.loop();
+    }
+
     leftTextBox.remove();
     leftInputButton.remove();
     rightTextBox.remove();
     rightInputButton.remove();
+
+    leftTankReady = false;
+    rightTankReady = false;
   }
 }
 
@@ -301,6 +437,9 @@ function playerInteractions() {
 
   // Show bullet power representation
   if(gameOn) {
+
+    time();
+
     if (leftTurn && !rightTurn && !leftTank.isDead()) {
       push();
       rectMode(CENTER);
@@ -336,27 +475,34 @@ function playerInteractions() {
       if (leftTank.bulletArray[0].x > rightTank.x - rightTank.width/2 && leftTank.bulletArray[0].x < rightTank.x + rightTank.width/2 && leftTank.bulletArray[0].y > rightTank.y - rightTank.height/2 && leftTank.bulletArray[0].y < rightTank.y + rightTank.height/2) {
         removeBullet = true;
         rightTank.health -= 20;
+
+        tankHitSfx.play();
       }
     }
     if (rightTank.bulletArray.length > 0) {
       if (rightTank.bulletArray[0].x > leftTank.x - leftTank.width/2 && rightTank.bulletArray[0].x < leftTank.x + leftTank.width/2 && rightTank.bulletArray[0].y > leftTank.y - leftTank.height/2 && rightTank.bulletArray[0].y < leftTank.y + leftTank.height/2) {
         removeBullet = true;
         leftTank.health -= 20;
+
+        tankHitSfx.play();
       }
     }
   }
 }
 
 function displayTerrain() {
-  // backgroundImg.size(width, height);
 
   // Show terrain
-  rectWidth = width/rectHeights.length;
-  rectMode(CORNER);
-  for (let i=0; i<rectHeights.length; i++) {
-    fill(255);
-    noStroke();
-    rect(rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
+  if (startScreen || gameOn && !userInfo) {
+    image(backgroundImg, width/2, height/2);
+
+    rectWidth = width/rectHeights.length;
+    rectMode(CORNER);
+    for (let i=0; i<rectHeights.length; i++) {
+      fill(255);
+      noStroke();
+      rect(rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
+    }
   }
 }
 
@@ -387,7 +533,7 @@ class Tank {
   display(name) {
     if (!this.isDead()) {
 
-      // Show tank
+      // Get angle to terrain
       for (let i=0; i<rectHeights.length; i++) {
         if (i === this.x) {
           angleMode(DEGREES);
@@ -412,17 +558,19 @@ class Tank {
       }
       
       // Show tank
-      push();
-      rectMode(CENTER);
-      translate(this.x, this.y);
-      rotate(this.angleToTerrain);
-      if (this.theColor === 0) {
-        image(blueTankImg, 0, 0, this.width, this.height);
+      if (startScreen || gameOn && !userInfo) {
+        push();
+        rectMode(CENTER);
+        translate(this.x, this.y);
+        rotate(this.angleToTerrain);
+        if (this.theColor === 0) {
+          image(blueTankImg, 0, 0, this.width, this.height);
+        }
+        else {
+          image(redTankImg, 0, 0, this.width, this.height);
+        }
+        pop();
       }
-      else {
-        image(redTankImg, 0, 0, this.width, this.height);
-      }
-      pop();
     }
   }
 
@@ -442,10 +590,16 @@ class Tank {
         
       // }
 
-      if (this.bulletArray.length >= 2 || this.removeBullet || bullet.x < 0 || bullet.x > width) {
+      if (this.removeBullet) {
         this.bulletArray.shift();
         removeBullet = false;
         this.removeBullet = false;
+
+        groundHitSfx.play();
+      }
+
+      if (this.bulletArray.length > 1 || bullet.x < 0 || bullet.x > width) {
+        this.bulletArray.shift();
       }
     }
   }
@@ -513,14 +667,13 @@ class Bullet {
   update() {
 
     // Bullet movement
-    console.log(this.angle);
     this.x += cos(this.angle) * this.speedX;
     this.y += sin(this.angle) * this.speedY;
     if (this.angle > 0) {
-      this.speedY += 0.07;
+      this.speedY += 0.1;
     }
     else {
-      this.speedY -= 0.07;
+      this.speedY -= 0.1;
     }
   }
 
