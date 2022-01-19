@@ -17,6 +17,7 @@ let numberOfRects;
 let gameOn, gameOver;
 let timer, timeSet, setTimer, seconds, minutes;
 let removeBullet;
+let leftHP, rightHP, setEndHp;
 let userInfo, startScreen;
 let rectWidth;
 let leftTextBox, rightTextBox, leftInputButton, rightInputButton, startElements;
@@ -364,6 +365,26 @@ function interfaceScreens() {
       rightInputButton.mousePressed(rightInput);
       rightButtonCreate = false;
     }
+  }
+  else if (gameOver && !gameOn && !startScreen && !userInfo) {
+    if (setEndHp) {
+      leftHP = 100;
+      rightHP = 100;
+      setEndHp = false;
+    }
+
+    if (leftHP !== leftTank.health && !leftTank.health < 0) {
+      leftHP--;
+    }
+    if (rightHP !== rightTank.health && !rightTank.health < 0) {
+      rightHP--;
+    }
+
+    rect(10, leftHP, width/4, height/4);
+    rect(10, rightHP, width*0.75, height/4);
+
+    image(blueTankImg, width/4, height/2);
+    image(redTankImg, width*0.75, height/2);
   }
 
   if (leftTankReady === true && rightTankReady === true) {
