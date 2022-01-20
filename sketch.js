@@ -76,7 +76,7 @@ function setup() {
   }
 
   leftTank = new Tank(400, 100, 0);
-  rightTank = new Tank(width-400, 100, 1);
+  rightTank = new Tank(width-400, 100);
 }
 
 function draw() {
@@ -89,11 +89,11 @@ function draw() {
 
   leftTank.physics();
   leftTank.update();
-  leftTank.display(leftTankName);
+  leftTank.display();
 
   rightTank.physics();
   rightTank.update();
-  rightTank.display(rightTankName);
+  rightTank.display();
 
   // switchAfterWhile();
 }
@@ -107,29 +107,19 @@ function keyPressed() {
   }
   if (gameOn && leftTurn) {
     if (keyIsDown(68)) {
-      if (leftTank.x >= 0 + leftTank.width/2 && leftTank.x < width - leftTank.width/2) {
-
-        let moveSfxOn = true;
-        if (moveSfxOn) {
-          moveSfxOn = false;
-          moveSfx.volume(0.5);
+      if (rightTank.bulletArray.length <= 0) {
+        if (leftTank.x >= 0 + leftTank.width/2 && leftTank.x < width - leftTank.width/2) {
           moveSfx.play();
+          leftTank.x++;
         }
-
-        leftTank.x++;
       }
     }
     else if (keyIsDown(65)) {
-      if (leftTank.x > 0 + leftTank.width/2 && leftTank.x <= width - leftTank.width/2) {
-
-        let moveSfxOn = true;
-        if (moveSfxOn) {
-          moveSfxOn = false;
-          moveSfx.volume(0.5);
+      if (rightTank.bulletArray.length <= 0) {
+        if (leftTank.x > 0 + leftTank.width/2 && leftTank.x <= width - leftTank.width/2) {
           moveSfx.play();
+          leftTank.x--;
         }
-        
-        leftTank.x--;
       }
     }
     else {
@@ -138,29 +128,19 @@ function keyPressed() {
   }
   if (gameOn && rightTurn) {
     if (keyIsDown(39)) {
-      if (rightTank.x >= 0 + rightTank.width/2 && rightTank.x < width - rightTank.width/2) {
-
-        let moveSfxOn = true;
-        if (moveSfxOn) {
-          moveSfxOn = false;
-          moveSfx.volume(0.5);
+      if (leftTank.bulletArray.length <= 0) {
+        if (rightTank.x >= 0 + rightTank.width/2 && rightTank.x < width - rightTank.width/2) {
           moveSfx.play();
+          rightTank.x++;
         }
-
-        rightTank.x++;
       }
     }
     else if (keyIsDown(37)) {
-      if (rightTank.x > 0 + rightTank.width/2 && rightTank.x <= width - rightTank.width/2) {
-
-        let moveSfxOn = true;
-        if (moveSfxOn) {
-          moveSfxOn = false;
-          moveSfx.volume(0.5);
+      if (leftTank.bulletArray.length <= 0) {
+        if (rightTank.x > 0 + rightTank.width/2 && rightTank.x <= width - rightTank.width/2) {
           moveSfx.play();
+          rightTank.x--;
         }
-
-        rightTank.x--;
       }
     }
     else {
@@ -367,24 +347,42 @@ function interfaceScreens() {
     }
   }
   else if (gameOver && !gameOn && !startScreen && !userInfo) {
+
     if (setEndHp) {
-      leftHP = 100;
-      rightHP = 100;
+      leftHP = -100;
+      rightHP = -100;
       setEndHp = false;
     }
 
-    if (leftHP !== leftTank.health && !leftTank.health < 0) {
-      leftHP--;
+    if (-leftHP > leftTank.health) {
+      leftHP++;
     }
-    if (rightHP !== rightTank.health && !rightTank.health < 0) {
-      rightHP--;
+    if (-rightHP > rightTank.health) {
+      rightHP++;
     }
 
-    rect(10, leftHP, width/4, height/4);
-    rect(10, rightHP, width*0.75, height/4);
+    fill("green");
+    rect(width/4 - 10, height/3, 20, leftHP);
+    rect(width*0.75 - 10, height/3, 20, rightHP);
 
-    image(blueTankImg, width/4, height/2);
-    image(redTankImg, width*0.75, height/2);
+    image(blueTankImg, width/4, height/2, leftTank.width, leftTank.height);
+    image(redTankImg, width*0.75, height/2, rightTank.width, rightTank.height);
+
+    if (frameCount % 60 < 30) {
+      if (-leftHP === leftTank.health && -rightHP === rightTank.health) {
+        if (-leftHP > -rightHP) {
+          fill("blue");
+          text(leftTank.name + " has won!", width/2, height*0.75);
+        }
+        else if (-leftHP < -rightHP) {
+          fill("red");
+          text(rightTank.name + " has won!", width/2, height*0.75);
+        }
+        else {
+          text("Draw!", width/2, height*0.75);
+        }
+      }
+    }
   }
 
   if (leftTankReady === true && rightTankReady === true) {
@@ -416,6 +414,9 @@ function interfaceScreens() {
 
 function leftInput() {
   leftTankName = leftTextBox.value();
+  if (leftTextBox.value() === "") {
+    leftTank.name = "Left";
+  }
   // if (leftTankName.length < 1) {
   //   let temp = frameCount + 180;
   //   while (frameCount < temp) {
@@ -442,6 +443,10 @@ function leftInput() {
 
 function rightInput() {
   rightTankName = rightTextBox.value();
+  if (rightTextBox.value() === "") {
+    rightTank.name = "Right";
+  }
+
   rightTankReady = true;
 }
 
@@ -460,6 +465,18 @@ function playerInteractions() {
   if(gameOn) {
 
     time();
+
+    if (leftTank.isDead() || rightTank.isDead()) {
+      setEndHp = true;
+      gameOn = false;
+      gameOver = true;
+    }
+    
+    if (timer <= 0) {
+      setEndHp = true;
+      gameOn = false;
+      gameOver = true;
+    }
 
     if (leftTurn && !rightTurn && !leftTank.isDead()) {
       push();
@@ -548,10 +565,10 @@ class Tank {
     this.bulletArray = [];
     this.bulletSpeed = 53;
     this.health = 100;
-    this.angleToTerrain, this.angleToMouse, this.tankTouchGround, this.removeBullet;
+    this.name, this.angleToTerrain, this.angleToMouse, this.tankTouchGround, this.removeBullet;
   }
 
-  display(name) {
+  display() {
     if (!this.isDead()) {
 
       // Get angle to terrain
@@ -570,7 +587,7 @@ class Tank {
         textSize(24);
         textAlign(CENTER);
         fill(255);
-        text(name, this.x, this.y - this.height*2);
+        text(this.name, this.x, this.y - this.height*2);
 
         fill("green");
         translate(this.x, this.y - this.height*1.5);
@@ -694,7 +711,7 @@ class Bullet {
       this.speedY += 0.1;
     }
     else {
-      this.speedY -= 0.1;
+      this.speedY -= 0.15;
     }
   }
 
