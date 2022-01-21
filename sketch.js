@@ -22,8 +22,8 @@ let userInfo, startScreen;
 let rectWidth;
 let leftTextBox, rightTextBox, leftInputButton, rightInputButton, startElements;
 let leftTankName, rightTankName;
-let leftButtonCreate, rightButtonCreate;
-let leftTextCreate, rightTextCreate;
+let fiveBox, tenBox, threeBox;
+let nameElementsCreate, timeElementsCreate;
 let leftTankReady, rightTankReady;
 
 function preload() {
@@ -33,7 +33,7 @@ function preload() {
   backgroundImg = loadImage("assets/image/background/background.jpg");
   startMusic = createAudio("assets/sound/music/start-music.mp3");
   gameMusic = createAudio("assets/sound/music/game-music.ogg");
-  moveSfx = createAudio("assets/sound/tank/tank-engine-sfx.mp3");
+  moveSfx = loadSound("assets/sound/tank/tank-engine-sfx.mp3");
   shotSfx = createAudio("assets/sound/tank/shot-sfx.ogg");
   tankHitSfx = createAudio("assets/sound/tank/tank-hit-sfx.ogg");
   groundHitSfx = createAudio("assets/sound/tank/ground-hit-sfx.ogg");
@@ -47,11 +47,8 @@ function setup() {
   startScreen = true;
   startMusicOn = true;
 
-  leftButtonCreate = true;
-  rightButtonCreate = true;
-
-  leftTextCreate = true;
-  rightTextCreate = true;
+  nameElementsCreate = true;
+  timeElementsCreate = true;
 
   leftTankName = "";
   rightTankName = "";
@@ -109,6 +106,8 @@ function keyPressed() {
     if (keyIsDown(68)) {
       if (rightTank.bulletArray.length <= 0) {
         if (leftTank.x >= 0 + leftTank.width/2 && leftTank.x < width - leftTank.width/2) {
+
+          moveSfx.playMode("untilDone");
           moveSfx.play();
           leftTank.x++;
         }
@@ -117,6 +116,8 @@ function keyPressed() {
     else if (keyIsDown(65)) {
       if (rightTank.bulletArray.length <= 0) {
         if (leftTank.x > 0 + leftTank.width/2 && leftTank.x <= width - leftTank.width/2) {
+
+          moveSfx.playMode("untilDone");
           moveSfx.play();
           leftTank.x--;
         }
@@ -130,6 +131,8 @@ function keyPressed() {
     if (keyIsDown(39)) {
       if (leftTank.bulletArray.length <= 0) {
         if (rightTank.x >= 0 + rightTank.width/2 && rightTank.x < width - rightTank.width/2) {
+
+          moveSfx.playMode("untilDone");
           moveSfx.play();
           rightTank.x++;
         }
@@ -138,6 +141,8 @@ function keyPressed() {
     else if (keyIsDown(37)) {
       if (leftTank.bulletArray.length <= 0) {
         if (rightTank.x > 0 + rightTank.width/2 && rightTank.x <= width - rightTank.width/2) {
+
+          moveSfx.playMode("untilDone");
           moveSfx.play();
           rightTank.x--;
         }
@@ -147,6 +152,40 @@ function keyPressed() {
       moveSfx.stop();
     }
   }
+  if (!startScreen) {
+    if (keyIsDown(27)) {
+
+      startScreen = true;
+      startMusicOn = true;
+
+      nameElementsCreate = true;
+      timeElementsCreate = true;
+
+      leftTankReady = false;
+      rightTankReady = false;
+
+      turn = random(0, 100);
+      if (turn > 50) {
+        rightTurn = true;
+        leftTurn = false;
+        turn = true;
+      }
+      else {
+        leftTurn = true;
+        rightTurn = false;
+        turn = true;
+      }
+
+      leftTank = new Tank(400, 100, 0);
+      rightTank = new Tank(width-400, 100);
+
+      gameOn = false;
+      gameMusicOn = false;
+      userInfo = false;
+      gameOver = false;
+    }
+  }
+
 }
 
 function mousePressed() {
@@ -245,6 +284,14 @@ function time() {
       timeSet = false;
     }
   }
+  else if (setTimer === 3) {
+    if (timeSet) {
+      timer = 10800;
+      minutes = 3;
+      seconds = 60;
+      timeSet = false;
+    }
+  }
   else {
     if (timeSet) {
       timer = 3600;
@@ -322,28 +369,43 @@ function interfaceScreens() {
     text("Enter LEFT TANK name:", width/4, height/2 - 30*1.5);
     text("Enter RIGHT TANK name:", width*0.75, height/2 - 30*1.5);
 
-    if (leftTextCreate && rightTextCreate && leftButtonCreate && rightButtonCreate) {
+    if (nameElementsCreate) {
       // Text box & button for name of left tank input
       leftTextBox = createInput("");
       leftTextBox.size(150, 20);
       leftTextBox.position(width/4 - leftTextBox.width/2, height/2 - leftTextBox.height);
-      leftTextCreate = false;
 
       leftInputButton = createButton("Submit");
       leftInputButton.position(width/4 - leftInputButton.width/2, height/2 + leftTextBox.height/3);
       leftInputButton.mousePressed(leftInput);
-      leftButtonCreate = false;
 
       // Text box & button for name of right tank input
       rightTextBox = createInput("");
       rightTextBox.size(150, 20);
       rightTextBox.position(width*0.75 - rightTextBox.width/2, height/2 - rightTextBox.height);
-      rightTextCreate = false;
 
       rightInputButton = createButton("Submit");
       rightInputButton.position(width*0.75 - rightInputButton.width/2, height/2 + rightTextBox.height/3);
       rightInputButton.mousePressed(rightInput);
-      rightButtonCreate = false;
+
+      nameElementsCreate = false;
+    }
+    if (timeElementsCreate) {
+
+      fill(255);
+      fiveBox = createCheckbox("5 minutes", false);
+      fiveBox.position(width/2, height*0.6);
+      fiveBox.changed(fiveMinTimeSet);
+
+      tenBox = createCheckbox("10 minutes", false);
+      tenBox.position(width/2, height*0.7);
+      tenBox.changed(tenMinTimeSet);
+
+      threeBox = createCheckbox("3 minutes", false);
+      threeBox.position(width/2, height*0.8);
+      threeBox.changed(threeMinTimeSet);
+
+      timeElementsCreate = false;
     }
   }
   else if (gameOver && !gameOn && !startScreen && !userInfo) {
@@ -387,7 +449,6 @@ function interfaceScreens() {
 
   if (leftTankReady === true && rightTankReady === true) {
 
-    setTimer = 5;
     timeSet = true;
   
     userInfo = false;
@@ -407,6 +468,10 @@ function interfaceScreens() {
     rightTextBox.remove();
     rightInputButton.remove();
 
+    fiveBox.remove();
+    tenBox.remove();
+    threeBox.remove();
+
     leftTankReady = false;
     rightTankReady = false;
   }
@@ -416,6 +481,9 @@ function leftInput() {
   leftTankName = leftTextBox.value();
   if (leftTextBox.value() === "") {
     leftTank.name = "Left";
+  }
+  else {
+    leftTank.name = leftTextBox.value();
   }
   // if (leftTankName.length < 1) {
   //   let temp = frameCount + 180;
@@ -446,8 +514,38 @@ function rightInput() {
   if (rightTextBox.value() === "") {
     rightTank.name = "Right";
   }
+  else {
+    rightTank.name = rightTextBox.value();
+  }
 
   rightTankReady = true;
+}
+
+function fiveMinTimeSet() {
+  if (this.checked()) {
+    setTimer = 5;
+  }
+  else {
+    setTimer = 1;
+  }
+}
+
+function tenMinTimeSet() {
+  if (this.checked()) {
+    setTimer = 10;
+  }
+  else {
+    setTimer = 1;
+  }
+}
+
+function threeMinTimeSet() {
+  if (this.checked()) {
+    setTimer = 3;
+  }
+  else {
+    setTimer = 1;
+  }
 }
 
 function playerInteractions() {
@@ -708,7 +806,7 @@ class Bullet {
     this.x += cos(this.angle) * this.speedX;
     this.y += sin(this.angle) * this.speedY;
     if (this.angle > 0) {
-      this.speedY += 0.1;
+      this.speedY += 0.15;
     }
     else {
       this.speedY -= 0.15;
