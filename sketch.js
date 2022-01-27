@@ -1,4 +1,4 @@
-// CS30 Major Project - ShellShock
+// CS30 Major Project - Turn Based 2D Tank Game
 // Md Shaurov
 // January 27, 2022
 //
@@ -6,19 +6,17 @@
 // - describe what you did to take this project "above and beyond"
 
 // Global variables
-let shellshockLogoImg, blueTankImg, redTankImg, backgroundImg;
+let shellshockLogoImg, blueTankImg, redTankImg, deadTankImg, backgroundImg, helpButtonImg, impactImg;
 let startMusic, gameMusic;
 let startMusicOn, gameMusicOn;
 let shotSfx, moveSfx, groundHitSfx, tankHitSfx;
 let leftTank, rightTank, bullet;
 let turn, leftTurn, rightTurn;
-let rectHeights;
-let numberOfRects;
+let rectHeights, numberOfRects, rectWidth;
 let startScreen, userInfo, gameOn, gameOver, instructionsOn;
 let timer, timeSet, setTimer, seconds, minutes;
 let removeBullet;
 let leftHP, rightHP, setEndHp;
-let rectWidth;
 let leftTextBox, rightTextBox, leftInputButton, rightInputButton, startElements;
 let leftTankName, rightTankName;
 let fiveBox, tenBox, threeBox;
@@ -27,8 +25,11 @@ let leftTankReady, rightTankReady;
 
 function preload() {
   shellshockLogoImg = loadImage("assets/image/menu/shellshock-logo.png");
+  helpButtonImg = loadImage("assets/image/menu/help-button.png");
+  impactImg = loadImage("assets/image/effects/impact.png");
   blueTankImg = loadImage("assets/image/tank/blue-tank.png");
   redTankImg = loadImage("assets/image/tank/red-tank.png");
+  deadTankImg = loadImage("assets/image/tank/dead-tank.png");
   backgroundImg = loadImage("assets/image/background/background.jpg");
   startMusic = createAudio("assets/sound/music/start-music.mp3");
   gameMusic = createAudio("assets/sound/music/game-music.ogg");
@@ -40,7 +41,6 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  backgroundImg.resize(width, height);
   frameRate(60);
 
   startScreen = true;
@@ -76,7 +76,7 @@ function setup() {
   }
 
   leftTank = new Tank(200, 100, 0);
-  rightTank = new Tank(width-200, 100);
+  rightTank = new Tank(width-200, 100, 1);
 }
 
 function draw() {
@@ -95,7 +95,6 @@ function draw() {
   rightTank.display();
 
   interfaceScreens();
-  // switchAfterWhile();
 }
 
 function keyPressed() {
@@ -157,6 +156,7 @@ function keyPressed() {
   }
   if (!startScreen) {
     if (keyIsDown(27)) {
+      gameMusic.stop();
 
       startScreen = true;
       startMusicOn = true;
@@ -180,7 +180,7 @@ function keyPressed() {
       }
 
       leftTank = new Tank(200, 100, 0);
-      rightTank = new Tank(width-200, 100);
+      rightTank = new Tank(width-200, 100, 1);
 
       gameOn = false;
       gameMusicOn = false;
@@ -265,31 +265,6 @@ function mouseWheel(event) {
   }
 }
 
-function switchAfterWhile() {
-
-  if (leftTurn && turn) {
-    setTimeout(switchTurn(), 10000);
-    turn = false;
-  }
-  if (rightTurn && turn) {
-    setTimeout(switchTurn(), 10000);
-    turn = false;
-  }
-}
-
-function switchTurn() {
-  if (leftTurn) {
-    rightTurn = true;
-    leftTurn = false;
-    turn = true;
-  }
-  else if (rightTurn) {
-    leftTurn = true;
-    rightTurn = false;
-    turn = true;
-  }
-}
-
 function time() {
 
   // Duration of timer
@@ -370,7 +345,7 @@ function interfaceScreens() {
     fill(255);
     textSize(20);
     textAlign(CENTER);
-    if (frameCount % 120 < 60) {
+    if (frameCount % 120 < 60 && !instructionsOn) {
       fill(255, 255, 255, alpha);
       text("Press ENTER to start!", width/2, height/2);
     }
@@ -383,46 +358,51 @@ function interfaceScreens() {
 
     
   }
-  if (startScreen || userInfo && !gameOn && !gameOver) {
+  if (startScreen && !userInfo && !gameOn && !gameOver) {
 
     // Game logo
     imageMode(CENTER);
     image(shellshockLogoImg, width/2, height/5);
 
-    fill(0);
-    rect(30, height - 80, 70, 50);
+    image(helpButtonImg, 75, height-50, 100, 50);
+    if (mouseX > 25 && mouseX < 125 && mouseY > height - 75 && mouseY < height - 25) {
+      image(helpButtonImg, 75, height-50, 110, 55);
+    }
 
     if (instructionsOn) {
 
       fill(255, 0, 255, 75);
       rectMode(CENTER);
-      rect(width/2, height/2, width*0.75, height*0.75);
+      rect(width/2, height/2, width*0.75, height*0.50);
 
       fill(255);
       textSize(24);
       textAlign(CENTER);
-      text("Control:", width/2, height/8 + 30);
+      text("Control:", width/2, height/8 + 150);
       textSize(18);
       textAlign(LEFT);
-      text("A - Move left tank towards left.", width/8 + 15, height/8 + 60);
-      text("D - Move left tank towards right.", width/8 + 15, height/8 + 90);
-      text("Left Arrow - Move right tank towards left.", width/8 + 15, height/8 + 120);
-      text("Right Arrow - Move right tank towards right.", width/8 + 15, height/8 + 150);
+      text("A - Move left tank towards left.", width/8 + 15, height/8 + 180);
+      text("D - Move left tank towards right.", width/8 + 15, height/8 + 210);
+      text("Left Arrow - Move right tank towards left.", width/8 + 15, height/8 + 240);
+      text("Right Arrow - Move right tank towards right.", width/8 + 15, height/8 + 270);
 
-      text("Left Mouse Click - Tank shoots a shell.", width*0.6 - 15, height/8 + 60);
-      text("Mouse Wheel Up - Increase shell power.", width*0.6 - 15, height/8 + 90);
-      text("Mouse Wheel Down - Decrease shell power.", width*0.6 - 15, height/8 + 120);
-      text("Esc - Return to home screen.", width*0.6 - 15, height/8 + 150);
+      text("Left Mouse Click - Tank shoots a shell.", width*0.6 - 15, height/8 + 180);
+      text("Mouse Wheel Up - Increase shell power.", width*0.6 - 15, height/8 + 210);
+      text("Mouse Wheel Down - Decrease shell power.", width*0.6 - 15, height/8 + 240);
+      text("Esc - Return to home screen.", width*0.6 - 15, height/8 + 270);
 
       textSize(24);
       textAlign(CENTER);
-      text("How to play:", width/2, height/8 + 210);
+      text("How to play:", width/2, height/8 + 300);
       textSize(18);
       textAlign(LEFT);
-      text("Choose a unique name for each tank's name or you can choose to leave name empty. Choose the duration of the match. Click 'submit' for both", width/8 + 15, height/8 + 240);
-      text("tanks. When it is a player's turn the yellow circle which surrounds their tank will appear. It is the bullet power adjustment circle.", width/8 + 15, height/8 + 260);
-      text("Using the mouse wheel they can adjust the power of the bullet, and take aim towards the enemy tank, and fire! Once a player has fired", width/8 + 15, height/8 + 280);
-      text("it will become the opposite player's turn. The match will be over once a tank has zero hit points or the time runs out.", width/8 + 15, height/8 + 300);
+      text("Choose a unique name for each tank's name or you can choose to leave name empty. Choose the duration of the match. Click 'submit' for both", width/8 + 15, height/8 + 330);
+      text("tanks. When it is a player's turn the yellow circle which surrounds their tank will appear. It is the bullet power adjustment circle.", width/8 + 15, height/8 + 350);
+      text("Using the mouse wheel they can adjust the power of the bullet, and take aim towards the enemy tank, and fire! Once a player has fired", width/8 + 15, height/8 + 370);
+      text("it will become the opposite player's turn. The match will be over once a tank has zero hit points or the time runs out.", width/8 + 15, height/8 + 390);
+
+      textAlign(CENTER);
+      text("Press the 'Help' button again to close this menu", width/2, height/8 + 450);
     }
   }
   if (!startScreen && userInfo && !gameOn && !gameOver) {
@@ -500,13 +480,28 @@ function interfaceScreens() {
       rightHP++;
     }
 
+    textAlign(CENTER);
+    textSize(24);
+    fill("white");
+    text("Game Over!", width/2, height/8);
+
     // Show health as bars
     fill("green");
-    rect(width/4 - 10, height/3, 20, leftHP);
-    rect(width*0.75 - 10, height/3, 20, rightHP);
+    rect(width/4 - 10, height/2, 20, leftHP);
+    rect(width*0.75 - 10, height/2, 20, rightHP);
 
-    image(blueTankImg, width/4, height/2, leftTank.width, leftTank.height);
-    image(redTankImg, width*0.75, height/2, rightTank.width, rightTank.height);
+    if (-leftHP > -rightHP) {
+      image(blueTankImg, width/4, height*0.65, leftTank.width, leftTank.height);
+      image(deadTankImg, width*0.75, height*0.65, rightTank.width, rightTank.height);
+    }
+    else if (-leftHP < -rightHP) {
+      image(deadTankImg, width/4, height*0.65, leftTank.width, leftTank.height);
+      image(redTankImg, width*0.75, height*0.65, rightTank.width, rightTank.height);
+    }
+    else {
+      image(blueTankImg, width/4, height/2, leftTank.width, leftTank.height);
+      image(redTankImg, width*0.75, height/2, rightTank.width, rightTank.height);
+    }
 
 
     // Print winner/draw message
@@ -514,20 +509,22 @@ function interfaceScreens() {
       if (-leftHP === leftTank.health && -rightHP === rightTank.health) {
         if (-leftHP > -rightHP) {
           fill("blue");
-          text(leftTank.name + " has won!", width/2, height*0.75);
+          text(leftTank.name + " has won!", width/2, height/2);
         }
         else if (-leftHP < -rightHP) {
           fill("red");
-          text(rightTank.name + " has won!", width/2, height*0.75);
+          text(rightTank.name + " has won!", width/2, height/2);
         }
         else {
-          text("Draw!", width/2, height*0.75);
+          text("Draw!", width/2, height/2);
         }
       }
     }
 
     if (-leftHP === leftTank.health && -rightHP === rightTank.health) {
-      text("Press ESCAPE to return to home screen.", width/2, height*0.85);
+      fill("white");
+      text("Press ESCAPE to return to home screen!", width/2, height*0.85);
+    }
   }
 
   if (leftTankReady === true && rightTankReady === true) {
@@ -615,15 +612,6 @@ function threeMinTimeSet() {
 
 function playerInteractions() {
 
-  // push();
-  // let angleToMouse = atan2(mouseY - leftTank.y, mouseX - leftTank.x);
-
-  // fill("blue");
-  // translate(leftTank.x, rightTank.y)
-  // rotate(angleToMouse);
-  // rect(0, 0, 20, 5);
-  // pop()
-
   // Show bullet power representation
   if(gameOn) {
 
@@ -674,18 +662,25 @@ function playerInteractions() {
 
     if (leftTank.bulletArray.length > 0) {
       if (leftTank.bulletArray[0].x > rightTank.x - rightTank.width/2 && leftTank.bulletArray[0].x < rightTank.x + rightTank.width/2 && leftTank.bulletArray[0].y > rightTank.y - rightTank.height/2 && leftTank.bulletArray[0].y < rightTank.y + rightTank.height/2) {
+        
+        image(impactImg, leftTank.bulletArray[0].x, leftTank.bulletArray[0].y, 30, 30);
         tankHitSfx.play();
         
         removeBullet = true;
         rightTank.health -= 20;
+        tankHitSfx.stop();
       }
     }
     if (rightTank.bulletArray.length > 0) {
       if (rightTank.bulletArray[0].x > leftTank.x - leftTank.width/2 && rightTank.bulletArray[0].x < leftTank.x + leftTank.width/2 && rightTank.bulletArray[0].y > leftTank.y - leftTank.height/2 && rightTank.bulletArray[0].y < leftTank.y + leftTank.height/2) {
+        
+        image(impactImg, rightTank.bulletArray[0].x, rightTank.bulletArray[0].y, 30, 30);
+        
         tankHitSfx.play();
         
         removeBullet = true;
         leftTank.health -= 20;
+        tankHitSfx.stop();
       }
     }
   }
@@ -695,7 +690,7 @@ function displayTerrain() {
 
   // Show terrain
   if (startScreen || gameOn && !userInfo) {
-    image(backgroundImg, width/2, height/2);
+    image(backgroundImg, width/2, height/2, width, height);
 
     rectWidth = width/rectHeights.length;
     rectMode(CORNER);
@@ -724,9 +719,9 @@ class Tank {
     this.y = y;
     this.width = 50;
     this.height = 30;
-    this.theColor = color;
     this.bulletArray = [];
     this.bulletSpeed = 53;
+    this.theColor = color;
     this.health = 100;
     this.name, this.angleToTerrain, this.angleToMouse, this.tankTouchGround, this.removeBullet;
   }
@@ -767,8 +762,11 @@ class Tank {
         if (this.theColor === 0) {
           image(blueTankImg, 0, 0, this.width, this.height);
         }
-        else {
+        else if (this.theColor === 1) {
           image(redTankImg, 0, 0, this.width, this.height);
+        }
+        else {
+          image(deadTankImg, 0, 0, this.width, this.height);
         }
         pop();
       }
@@ -793,6 +791,7 @@ class Tank {
         this.bulletArray.shift();
         removeBullet = false;
         this.removeBullet = false;
+        tankHitSfx.stop();
       }
 
       if (this.bulletArray.length > 1 || bullet.x < 0 || bullet.x > width) {
@@ -823,6 +822,7 @@ class Tank {
 
   isDead() {
     if (this.health <= 0) {
+      this.theColor = 2;
       return true;
     }
   }
@@ -856,7 +856,10 @@ class Bullet {
       this.bulletTouchGround = collidePointRect(this.x, this.y, rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
 
       if (this.bulletTouchGround) {
+
+        image(impactImg, this.x, this.y, 30, 30);
         removeBullet = true;
+        break;
       }
     }
   }
@@ -867,7 +870,7 @@ class Bullet {
     this.x += cos(this.angle) * this.speedX;
     this.y += sin(this.angle) * this.speedY;
     if (this.angle > 0) {
-      this.speedY += 0.15;
+      this.speedY += 0.25;
     }
     else {
       this.speedY -= 0.15;
