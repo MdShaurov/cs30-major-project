@@ -561,6 +561,7 @@ function interfaceScreens() {
   }
 }
 
+// Text box input functions
 function leftInput() {
   leftTankName = leftTextBox.value();
   if (leftTextBox.value() === "") {
@@ -586,6 +587,7 @@ function rightInput() {
   rightTankReady = true;
 }
 
+// Setting game durations
 function fiveMinTimeSet() {
   if (this.checked()) {
     setTimer = 5;
@@ -615,7 +617,6 @@ function threeMinTimeSet() {
 
 function playerInteractions() {
 
-  // Show bullet power representation
   if(gameOn) {
 
     time();
@@ -632,6 +633,7 @@ function playerInteractions() {
       gameOver = true;
     }
 
+    // Show bullet power representation
     if (leftTurn && !rightTurn && !leftTank.isDead()) {
       push();
       rectMode(CENTER);
@@ -663,6 +665,7 @@ function playerInteractions() {
       pop();
     }
 
+    // Bullet to tank interation
     if (leftTank.bulletArray.length > 0) {
       if (leftTank.bulletArray[0].x > rightTank.x - rightTank.width/2 && leftTank.bulletArray[0].x < rightTank.x + rightTank.width/2 && leftTank.bulletArray[0].y > rightTank.y - rightTank.height/2 && leftTank.bulletArray[0].y < rightTank.y + rightTank.height/2) {
         
