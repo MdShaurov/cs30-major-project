@@ -358,12 +358,14 @@ function interfaceScreens() {
 
     
   }
-  if (startScreen && !userInfo && !gameOn && !gameOver) {
-
+  if (startScreen || userInfo && !gameOn && !gameOver) {
     // Game logo
     imageMode(CENTER);
     image(shellshockLogoImg, width/2, height/5);
+  }
+  if (startScreen && !userInfo && !gameOn && !gameOver) {
 
+    // Help button
     image(helpButtonImg, 75, height-50, 100, 50);
     if (mouseX > 25 && mouseX < 125 && mouseY > height - 75 && mouseY < height - 25) {
       image(helpButtonImg, 75, height-50, 110, 55);
@@ -487,6 +489,7 @@ function interfaceScreens() {
 
     // Show health as bars
     fill("green");
+    rectMode(LEFT);
     rect(width/4 - 10, height/2, 20, leftHP);
     rect(width*0.75 - 10, height/2, 20, rightHP);
 
@@ -499,8 +502,8 @@ function interfaceScreens() {
       image(redTankImg, width*0.75, height*0.65, rightTank.width, rightTank.height);
     }
     else {
-      image(blueTankImg, width/4, height/2, leftTank.width, leftTank.height);
-      image(redTankImg, width*0.75, height/2, rightTank.width, rightTank.height);
+      image(blueTankImg, width/4, height*0.65, leftTank.width, leftTank.height);
+      image(redTankImg, width*0.75, height*0.65, rightTank.width, rightTank.height);
     }
 
 
@@ -855,7 +858,7 @@ class Bullet {
     for (let i=0; i<rectHeights.length; i++) {
       this.bulletTouchGround = collidePointRect(this.x, this.y, rectWidth*i, height - rectHeights[i], 1, rectHeights[i]);
 
-      if (this.bulletTouchGround) {
+      if (this.bulletTouchGround || timer === 0) {
 
         image(impactImg, this.x, this.y, 30, 30);
         removeBullet = true;
